@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta
 from typing import Union, Any, Optional, List, Annotated
 from jose import jwt, JWTError
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
@@ -106,26 +106,210 @@ def authenticate_user(db, username: str, password: str):
         return False
     return user
 
-def add_laptop(db: Session, laptop: laptopDevice):
-    db_add_laptop = Laptops(**laptop.model_dump())
-    db.add(db_add_laptop)
-    db.commit()
-    db.refresh(db_add_laptop)
-    return(db_add_laptop)
 
-def add_tablet(db: Session, tablet: tabletDevice):
-    db_add_tablet = Tablets(**tablet.model_dump())
-    db.add(db_add_tablet)
-    db.commit()
-    db.refresh(db_add_tablet)
-    return(db_add_tablet)
+def add_device(db: Session, device: DeviceRequest):
+    try:
+        device_section = Devices(
+            category = device.category,
+            brand = device.brand,
+            model = device.model,
+            serial_number = device.serial_number,
+            inventory_number = device.inventory_number,
+            delivery_date = device.delivery_date,
+            deployment_date = device.deployment_date,
+            status_id = device.status_id,
+            division_id = device.division_id,
+        )
 
-def add_mouse(db: Session, mouse: mouseDevice):
-    db_add_mouse = Mouses(**mouse.model_dump())
-    db.add(db_add_mouse)
-    db.commit()
-    db.refresh(db_add_mouse)
-    return(db_add_mouse)
+        db.add(device_section)
+        db.commit()
+        db.refresh(device_section)
+        return (device_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+def add_laptop(db: Session, laptop: LaptopRequest):
+    try:
+        device_section = Devices(
+            category = laptop.category,
+            brand = laptop.brand,
+            model = laptop.model,
+            serial_number = laptop.serial_number,
+            inventory_number = laptop.inventory_number,
+            delivery_date = laptop.delivery_date,
+            deployment_date = laptop.deployment_date,
+            status_id = laptop.status_id,
+            division_id = laptop.division_id,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        laptop_section = Laptops(
+            
+            cpu_type_id = laptop.cpu_type_id,
+            hard_disk_capacity = laptop.hard_disk_capacity,
+            memory_capacity = laptop.memory_capacity,
+            processor_speed = laptop.processor_speed,
+            processor_type = laptop.processor_type,
+            computer_name = laptop.computer_name,
+            mac_address = laptop.mac_address,
+            operating_system = laptop.operating_system,
+            microsoft_office_version = laptop.microsoft_office_version,
+            antivirus = laptop.antivirus,
+            pdf_reader = laptop.pdf_reader,
+            warranty_start_date = laptop.warranty_start_date,
+            warranty_end_date = laptop.warranty_end_date,
+            return_date = laptop.return_date,
+            devices_id = device_section.devices_id,
+        )
+
+        db.add(laptop_section)
+        db.commit()
+        db.refresh(laptop_section)
+        return (device_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+
+def add_tablet(db: Session, tablet: TabletRequest):
+    try:
+        device_section = Devices(
+            category = tablet.category,
+            brand = tablet.brand,
+            model = tablet.model,
+            serial_number = tablet.serial_number,
+            inventory_number = tablet.inventory_number,
+            delivery_date = tablet.delivery_date,
+            deployment_date = tablet.deployment_date,
+            status_id = tablet.status_id,
+            division_id = tablet.division_id,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        tablet_section = Tablets(
+            
+            imei_number = tablet.imei_number,
+            operating_system = tablet.operating_system,
+            version = tablet.version,
+            hard_disk_capacity = tablet.hard_disk_capacity,
+            memory_capacity = tablet.memory_capacity,
+            warranty_start_date = tablet.warranty_start_date,
+            warranty_end_date = tablet.warranty_end_date,
+            return_date = tablet.return_date,
+            devices_id = device_section.devices_id,
+        )
+
+        db.add(tablet_section)
+        db.commit()
+        db.refresh(tablet_section)
+        return (tablet_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+def add_mouse_keyboard(db: Session, mouse_keyboard: MouseKeyboardRequest):
+    try:
+        device_section = Devices(
+            category = mouse_keyboard.category,
+            brand = mouse_keyboard.brand,
+            model = mouse_keyboard.model,
+            serial_number = mouse_keyboard.serial_number,
+            inventory_number = mouse_keyboard.inventory_number,
+            delivery_date = mouse_keyboard.delivery_date,
+            deployment_date = mouse_keyboard.deployment_date,
+            status_id = mouse_keyboard.status_id,
+            division_id = mouse_keyboard.division_id,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        mouse_keyboard_section = MouseKeyboards(
+            connection_type_id = mouse_keyboard.connection_type_id,
+            devices_id = device_section.devices_id,
+        )
+
+        db.add(mouse_keyboard_section)
+        db.commit()
+        db.refresh(mouse_keyboard_section)
+        return (mouse_keyboard_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+def add_printer(db: Session, printer: PrinterRequest):
+    try:
+        device_section = Devices(
+            category = printer.category,
+            brand = printer.brand,
+            model = printer.model,
+            serial_number = printer.serial_number,
+            inventory_number = printer.inventory_number,
+            delivery_date = printer.delivery_date,
+            deployment_date = printer.deployment_date,
+            status_id = printer.status_id,
+            division_id = printer.division_id,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        printer_section = Printers(
+            ip_address = printer.ip_address,
+            feature_id = printer.feature_id,
+            connection_type_id = printer.connection_type_id,
+            devices_id = device_section.devices_id,
+        )
+
+        db.add(printer_section)
+        db.commit()
+        db.refresh(printer_section)
+        return (printer_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+def add_crav_equipment(db: Session, crav_equipment: CRAVEquipmentRequest):
+    try:
+        device_section = Devices(
+            category = crav_equipment.category,
+            brand = crav_equipment.brand,
+            model = crav_equipment.model,
+            serial_number = crav_equipment.serial_number,
+            inventory_number = crav_equipment.inventory_number,
+            delivery_date = crav_equipment.delivery_date,
+            deployment_date = crav_equipment.deployment_date,
+            status_id = crav_equipment.status_id,
+            division_id = crav_equipment.division_id,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        crav_section = CRAVEquipments(
+            name = crav_equipment.name,
+            ip_address = crav_equipment.ip_address,
+            mac_address = crav_equipment.mac_address,
+            devices_id = device_section.devices_id,
+        )
+
+        db.add(crav_section)
+        db.commit()
+        db.refresh(crav_section)
+        return (crav_section)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 
@@ -171,210 +355,35 @@ async def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2P
 async def read_users_me(current_user: user_dependency):
     return current_user
 
-@app.post('/test/')
-def get_items_view(db: Session=Depends(get_db)):
-    return "hello world"
+# @app.get("/db-test")
+# def test_database_connection(db: Session = Depends(get_db)):
+#     try:
+#         db.execute(text("SELECT 1"))
+#         return JSONResponse(status_code=200, content={"message": "Database connection successful."})
+#     except Exception as e:
+#         return JSONResponse(status_code=500, content={"message": "Database connection failed.", "error": str(e)})
 
-@app.post('/add-laptop/', response_model = laptopDevice)
-def add_laptop_view(laptop: laptopDevice, db: Session=Depends(get_db)):
+
+@app.post('/add-device/', response_model=DeviceRequest)
+def add_device_view(device: DeviceRequest, db: Session=Depends(get_db)):
+    return add_device(db, device)
+
+@app.post('/add-laptop/', response_model=DeviceRequest)
+def add_laptop_view(laptop: LaptopRequest, db: Session=Depends(get_db)):
     return add_laptop(db, laptop)
 
-@app.post('/add-tablet/', response_model = tabletDevice)
-def add_tablet_view(tablet: tabletDevice, db: Session=Depends(get_db)):
+@app.post('/add-tablet/', response_model=DeviceRequest)
+def add_tablet_view(tablet: TabletRequest, db: Session=Depends(get_db)):
     return add_tablet(db, tablet)
 
-@app.post('/add-mouse/', response_model = mouseDevice)
-def add_mouse_view(mouse: mouseDevice, db: Session=Depends(get_db)):
-    return add_mouse(db, mouse)
+@app.post('/add-mouse-keyboard/', response_model=DeviceRequest)
+def add_mouse_keyboard_view(mouse_keyboard: MouseKeyboardRequest, db: Session=Depends(get_db)):
+    return add_mouse_keyboard(db, mouse_keyboard)
 
+@app.post('/add-printer/', response_model=DeviceRequest)
+def add_printer_view(printer: PrinterRequest, db: Session=Depends(get_db)):
+    return add_printer(db, printer)
 
-
-# SECTION FOR ADDING ITEMS #################################################################################
-
-
-
-
-
-# def authenticate_user(email:str, password:str, db):
-#     user = db.query(Users).filter(Users.email == email).first()
-#     if not user:
-#         return False # no user found
-#     if not pwd_context.verify(password, user.password):
-#         return False # wrong password
-#     return user
-
-
-
-# def create_access_token(email: str, user_id: int, expires_delta: timedelta):
-#     encode = {'sub': email, 'id': user_id} # encodes user details into token
-#     expires = datetime.utcnow() + expires_delta
-#     encode.update({'exp': expires})
-#     return jwt.encode(encode, SECRET_KEY, algorithm=ALGORITHM)
-
-
-# async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]): 
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Could not validate credentials",
-#         headers={"WWW-Authenticate": "Bearer"},
-#     )
-#     try:
-#         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-#         email = payload.get("sub")
-#         user_id = payload.get('id')
-#         if email is None or user_id is None:
-#             raise credentials_exception
-#         return{'username': email, 'id': user_id}
-#     except JWTError:
-#         raise credentials_exception
-    
-# user_dependency = Annotated[dict, Depends(get_current_user)]
-
-
-# @app.post("/create-user", status_code=status.HTTP_201_CREATED)
-# async def create_user(db: db_dependency, user_model: CreateUserRequest):
-#     user = Users(
-#             firstname = user_model.firstname,
-#             lastname = user_model.lastname,
-#             email = user_model.email,
-#             password = pwd_context.hash(user_model.password),
-#             role_id = user_model.role_id,
-#             active = user_model.active,
-#             date_created = user_model.date_created,
-#             last_updated = user_model.last_updated,
-#     )
-#     db.add(user)
-#     db.commit()
-#     db.refresh(user)
-#     return {"message": "User created successfully"}
-
-
-
-# @app.post("/token", response_model=Token)
-# async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: db_dependency):
-#     user = authenticate_user(form_data.username, form_data.password, db)
-#     if not user:
-#         raise HTTPException(
-#             status_code=status.HTTP_401_UNAUTHORIZED,
-#             detail="Incorrect username or password",
-#         )
-    
-#     access_token = create_access_token(user.email, user.user_id, timedelta(minutes=20)) # encodes user details into token
-
-#     return Token(access_token=access_token, token_type="bearer")
-
-
-
-# @app.get("/me", status_code=status.HTTP_200_OK)
-# async def user(user: user_dependency, db: db_dependency):
-#     if user is None:
-#         raise HTTPException(status_code=401, detail='Authentication Failed')
-#     return{"User": user}
-
-
-
-
-
-
-
-
-
-
-
-
-
-# @app.get("/test-db")
-# def test_db_connection():
-#     try:
-#         engine.connect()
-#         return {"Successful"}
-#     except SQLAlchemyError as e:
-#         return {"message": "Connection failed", "error": str(e)}
-    
-
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["http://localhost:5173","http://localhost:88","http://172.16.0.7:88"],  # or 8080
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
-
-# # A SQLAlchemny ORM Item
-# class Items(Base):
-#     __tablename__ = "Items"
-
-#     Item_ID = Column(Integer, primary_key=True, index=True, autoincrement=True)
-#     Brand = Column(String(255), nullable=False)
-#     Model = Column(String(255), nullable=False)
-#     Serial_Number = Column(String(255), unique=True, nullable=False)
-#     Inventory_Number = Column(Integer, unique=True, nullable=False)
-#     Delivery_Date = Column(Date, nullable=True)
-#     Deployment_Date = Column(Date, nullable=True)
-#     System_Status = Column(String(255), nullable=True)
-
-# # Base.metadata.drop_all(bind=engine)
-# Base.metadata.create_all(bind=engine)
-
-
-# # A Pydantic Place
-# class ItemCreate(BaseModel):
-#     Brand: str
-#     Model: str
-#     Serial_Number: str
-#     Inventory_Number: int
-#     Delivery_Date: date
-#     Deployment_Date: date
-#     System_Status: str
-
-# class ItemOut(ItemCreate):
-#     Item_ID: int
-
-
-# def get_item_by_sn(db: Session, item_sn: str):
-#     return db.query(Items).where(Items.Serial_Number == item_sn).first()
-
-# def get_items_by_brand(db: Session, item_brand: str):
-#     return db.query(Items).where(Items.Brand == item_brand).all()
-
-# def delete_item_by_serial_number(db: Session, serial_number: str):
-#     item_to_delete = db.query(Items).filter(Items.Serial_Number == serial_number).first()
-#     if item_to_delete:
-#         db.delete(item_to_delete)
-#         db.commit()
-#         return("Item Deleted")
-
-# def get_items(db: Session):
-#     return db.query(Items).all()
-
-# def create_item(db: Session, item: ItemOut):
-#     db_add_item = Items(**item.model_dump())
-#     db.add(db_add_item)
-#     db.commit()
-#     db.refresh(db_add_item)
-#     return(db_add_item)
-
-# # Routes
-# @app.post('/create_item/', response_model = ItemOut)
-# def create_item_view(item: ItemCreate, db: Session=Depends(get_db)):
-#     return create_item(db, item)
-
-# @app.get('/get_items/', response_model = List[ItemOut])
-# def get_items_view(db: Session=Depends(get_db)):
-#     db_items = get_items(db)
-#     return db_items
-
-# @app.get('/get_items_by_brand/{brand}', response_model = List[ItemOut])
-# def get_items_by_brand_view(brand: str, db: Session=Depends(get_db)):
-#     db_items = get_items_by_brand(db, brand)
-#     return db_items
-
-# @app.get('/get_item/{sn}')
-# def get_item_view(sn: str, db: Session=Depends(get_db)):
-#     db_item = get_item_by_sn(db, sn)
-#     return db_item
-
-# @app.delete('/delete_item_by_serial_number/{serial_number}')
-# def delete_item_by_serial_number_view(serial_number: str, db: Session=Depends(get_db)):
-#     db_items = delete_item_by_serial_number(db, serial_number)
-#     return db_items
+@app.post('/add-crav-equipment/', response_model=DeviceRequest)
+def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, db: Session=Depends(get_db)):
+    return add_crav_equipment(db, crav_equipment)
