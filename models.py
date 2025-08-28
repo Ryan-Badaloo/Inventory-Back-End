@@ -21,10 +21,29 @@ class Users(Base):
     lastname = Column(String(255), nullable=False)
     email = Column(String(255), unique=True, nullable=False)
     password = Column(String, nullable=False)
-    role_id = Column(Integer, nullable=True)
+    role_id = Column(Integer, nullable=False)
     active = Column(Boolean, nullable=True)
     date_created = Column(Date, nullable=True)
     last_updated = Column(Date, nullable=True)
+
+class Clients(Base):
+    __tablename__ = "clients"
+
+    client_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    firstname = Column(String(255), nullable=False)
+    lastname = Column(String(255), nullable=False)
+    email = Column(String(255), unique=True, nullable=False)
+    phone_number = Column(String(255), nullable=True)
+    position = Column(String(255), nullable=True)
+    devices_id = Column(Integer, nullable=True)
+    parish_id = Column(Integer, nullable=True)
+    location_id = Column(Integer, nullable=True)
+    ltype_id = Column(Integer, nullable=True)
+    division_id = Column(Integer, nullable=True)
+    date_created = Column(Date, nullable=True)
+    last_updated = Column(Date, nullable=True)
+    added_by = Column(String(255), nullable=False)
+
 
 class Devices(Base):
     __tablename__ = "devices"
@@ -33,12 +52,30 @@ class Devices(Base):
     category = Column(String(255), nullable=False)
     brand = Column(String(255), nullable=False)
     model = Column(String(255), unique=True, nullable=False)
-    serial_number = Column(String, nullable=False)
+    serial_number = Column(String(255), nullable=False)
     inventory_number = Column(Integer, nullable=True)
     delivery_date = Column(Date, nullable=True)
     deployment_date = Column(Date, nullable=True)
-    status_id = Column(Integer, nullable=True)
-    division_id = Column(Integer, nullable=True)
+    status_id = Column(Integer, ForeignKey("system_status.status_id"), nullable=True)
+    division_id = Column(Integer, ForeignKey("division.division_id"), nullable=True)
+    client_id = Column(Integer, nullable=True)
+    added_by = Column(String(255), nullable=True)
+
+class SystemStatus(Base):
+    __tablename__ = "system_status"
+
+    status_id = Column(Integer, primary_key=True, index=True)
+    status_description = Column(String(255), nullable=False)
+
+class Divisions(Base):
+    __tablename__ = "division"
+
+    division_id = Column(Integer, primary_key=True, index=True)
+    division_name = Column(String(255), nullable=False)
+    location_id = Column(Integer)
+    added_by = Column(String(255), nullable=False)
+    date_added = Column(Date, nullable=True)
+    devices_id = Column(Integer)
 
 class Laptops(Base):
     __tablename__ = "laptop"
@@ -114,6 +151,8 @@ class CRAVEquipments(Base):
 
 
 
+
+
 # Pydantic Models #####################################################################################
 
 class CreateUserRequest(BaseModel):
@@ -122,9 +161,14 @@ class CreateUserRequest(BaseModel):
     email: str
     password: str
     role_id: int
-    active: bool
-    date_created: date
-    last_updated: date
+
+class CreateClientRequest(BaseModel):
+    firstname: str
+    lastname: str
+    email: str
+    phone_number: str
+    position: str
+    division_id: int
 
 class Token(BaseModel):
     access_token: str
