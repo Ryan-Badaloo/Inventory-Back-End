@@ -3,7 +3,7 @@ import os
 from datetime import datetime, timedelta, date
 from typing import Union, Any, Optional, List, Annotated
 from jose import jwt, JWTError
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
@@ -136,31 +136,6 @@ async def create_user(user_model: CreateUserRequest, current_user: user_dependen
     return {"message": "User created successfully"}
 
 
-
-@app.post("/create-client/", status_code=status.HTTP_201_CREATED)
-async def create_client(client_model: CreateClientRequest, current_user: user_dependency, db: Session=Depends(get_db)):
-    db_client = get_client(db, client_model.email)
-    if db_client:
-        raise HTTPException(status_code=400, detail="Client already exists")
-    client = Clients(
-            firstname = client_model.firstname,
-            lastname = client_model.lastname,
-            email = client_model.email,
-            phone_number = client_model.phone_number,
-            position = client_model.position,
-            division_id = client_model.division_id,
-            date_created = date.today(),
-            added_by = current_user.firstname + " " + current_user.lastname,
-    )
-    db.add(client)
-    db.commit()
-    db.refresh(client)
-    return {"message": "Client created successfully"}
-
-
-
-
-
 @app.delete('/delete-user/')
 def delete_user_view(first_name: str, last_name: str, email: str, current_user: user_dependency, db: Session=Depends(get_db)):
     deleted = db.query(Users).filter(Users.firstname == first_name, Users.lastname == last_name, Users.email == email).delete()
@@ -172,15 +147,7 @@ def delete_user_view(first_name: str, last_name: str, email: str, current_user: 
     return {"message": "User has been deleted"}
 
 
-@app.delete('/delete-client/')
-def delete_client_view(first_name: str, last_name: str, current_user: user_dependency, db: Session=Depends(get_db)):
-    deleted = db.query(Clients).filter(Clients.firstname == first_name, Clients.lastname == last_name).delete()
-    db.commit()
 
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="Client not found")
-    
-    return {"message": "Client has been deleted"}
 
 @app.post("/token")
 async def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
@@ -422,7 +389,6 @@ def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, current_user: 
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
  
-
 @app.get('/get-items/')
 def get_items_view(current_user: user_dependency, brand: Optional[str] = None, category: Optional[str] = None, db: Session=Depends(get_db)):
 
@@ -456,7 +422,6 @@ def get_items_view(current_user: user_dependency, brand: Optional[str] = None, c
 
 
     return result_list
-
 
 @app.get('/get-item-sn/')
 def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_db)):
@@ -670,7 +635,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
 
     return {"message": "Category not supported"}
 
-
 @app.delete('/delete-item/')
 def delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
     deleted = db.query(Devices).filter(Devices.serial_number == serial_number).delete()
@@ -682,3 +646,46 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
     return {"message": "Device has been deleted"}
 
 
+
+@app.post("/create-client/", status_code=status.HTTP_201_CREATED)
+async def create_client(client_model: CreateClientRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    db_client = get_client(db, client_model.email)
+    if db_client:
+        raise HTTPException(status_code=400, detail="Client already exists")
+    client = Clients(
+            firstname = client_model.firstname,
+            lastname = client_model.lastname,
+            email = client_model.email,
+            phone_number = client_model.phone_number,
+            position = client_model.position,
+            division_id = client_model.division_id,
+            date_created = date.today(),
+            added_by = current_user.firstname + " " + current_user.lastname,
+    )
+    db.add(client)
+    db.commit()
+    db.refresh(client)
+    return {"message": "Client created successfully"}
+
+@app.delete('/delete-client/')
+def delete_client_view(first_name: str, last_name: str, current_user: user_dependency, db: Session=Depends(get_db)):
+
+    deleted = db.query(Clients).filter(Clients.firstname == first_name, Clients.lastname == last_name).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Client not found")
+    
+    return {"message": "Client has been deleted"}
+
+@app.get('/get-clients/')
+def get_client_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
+
+    if name:
+        search = f"%{name.strip()}%"
+        query = db.query(Clients).filter((Clients.firstname + " " + Clients.lastname).ilike(search)).all()
+        return query
+    else:
+        return db.query(Clients).all()
+
+    
