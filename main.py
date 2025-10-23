@@ -1,9 +1,9 @@
 from passlib.context import CryptContext
 import os
 from datetime import datetime, timedelta, date
-from typing import Union, Any, Optional, List, Annotated
+from typing import Union, Any, Optional, List, Annotated, Dict
 from jose import jwt, JWTError
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_, desc, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
@@ -116,7 +116,7 @@ def authenticate_user(db, username: str, password: str):
 # THIS IS THE SECTION THAT DEFINES API'S ####################################################################
 
 @app.post("/create-user/", status_code=status.HTTP_201_CREATED)
-async def create_user(user_model: CreateUserRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+async def create_user(user_model: CreateUserRequest, db: Session=Depends(get_db)):
     db_user = get_user(db, user_model.email)
     if db_user:
         raise HTTPException(status_code=400, detail="User already exists")
@@ -631,6 +631,38 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 }
         else:
             return {"message": "Device not found"}
+        
+    else:
+        result = (
+            db.query(
+                Devices,
+                SystemStatus.status_description,
+                Divisions.division_name,
+            )
+            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .filter(Devices.serial_number == serial_number)
+            .first()
+        )
+
+        if result:
+            device, status_description, division_name = result
+            return {
+                "devices_id": device.devices_id,
+                "category": device.category,
+                "brand": device.brand,
+                "model": device.model,
+                "serial_number": device.serial_number,
+                "inventory_number": device.inventory_number,
+                "delivery_date": device.delivery_date,
+                "deployment_date": device.deployment_date,
+                "status_id": device.status_id,
+                "division_id": device.division_id,
+                "status_description": status_description,
+                "division_name": division_name,
+                }
+        else:
+            return {"message": "Device not found"}
 
 
     return {"message": "Category not supported"}
@@ -687,5 +719,281 @@ def get_client_view(current_user: user_dependency, name: Optional[str] = None, d
         return query
     else:
         return db.query(Clients).all()
-
     
+
+
+
+
+@app.get('/get-statuses/')
+def get_statuses_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(SystemStatus).all()
+
+@app.get('/get-cpu-types/')
+def get_cpu_types_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(CPUTypes).all()
+
+@app.get('/get-connection-types/')
+def get_connection_types_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(ConnectionTypes).all()
+
+@app.get('/get-printer-features/')
+def get_printer_features_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(PrinterFeatures).all()
+
+@app.get('/get-divisions/')
+def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Divisions).all()
+
+
+
+@app.put('/assign-device/')
+def assign_device_view(current_user: user_dependency, device_sn: str, client_id: int, db: Session=Depends(get_db)):
+    device = db.query(Devices).filter(Devices.serial_number == device_sn).first()
+
+    device.client_id = client_id
+    db.commit()
+    db.refresh(device)
+    return {"message": "Device assigned successfully", "item_id": device.devices_id, "client": client_id}
+
+
+@app.get('/get-comments/')
+def get_comments_view(current_user: user_dependency, devices_id: int, db: Session=Depends(get_db)):
+    return db.query(Comments).filter(Comments.devices_id == devices_id).order_by(desc(Comments.comment_id)).all()
+
+@app.post('/add-comments/')
+def add_comments_view(comment: CommentCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        device = db.query(Devices).filter(Devices.devices_id == comment.id).first()
+        
+        if device:
+            new_comment = Comments(
+                devices_id = comment.id,
+                comment_value = comment.comment,
+            )
+
+            db.add(new_comment)
+            db.commit()
+            db.refresh(new_comment)
+            return {"message": "Comment Has Been Added"}
+        else:
+            return {"message": "Comment Not Found"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.delete('/delete-comment/')
+def delete_comments_view(current_user: user_dependency, id: int, db: Session=Depends(get_db)):
+    deleted = db.query(Comments).filter(Comments.comment_id == id).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    return {"message": "comment has been deleted"}
+
+
+
+@app.post('/add-status/')
+def add_status_view(status: StatusCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        new_status = SystemStatus(
+            status_description = status.status,
+        )
+
+        db.add(new_status)
+        db.commit()
+        db.refresh(new_status)
+        return {"message": "Status Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.delete('/delete-status/')
+def delete_status_view(current_user: user_dependency, status: str, db: Session=Depends(get_db)):
+    deleted = db.query(SystemStatus).filter(SystemStatus.status_description == status).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    return {"message": "Device has been deleted"}
+    
+
+
+@app.post('/add-cpu-type/')
+def add_cpu_type_view(cpu_type: CPUTypeCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        new_cpu_type = CPUTypes(
+            cpu_type_description = cpu_type.cpu_type,
+        )
+
+        db.add(new_cpu_type)
+        db.commit()
+        db.refresh(new_cpu_type)
+        return {"message": "CPU Type Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@app.delete('/delete-cpu-type/')
+def delete_status_view(cpu_type: str, current_user: user_dependency, db: Session=Depends(get_db)):
+    deleted = db.query(CPUTypes).filter(CPUTypes.cpu_type_description == cpu_type).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="CPU Type not found")
+    
+    return {"message": "Cpu Type has been deleted"}
+
+
+@app.post('/add-connection-type/')
+def add_connection_type_view(ctype: ConnectionTypeCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        new_ctype = ConnectionTypes(
+            ctype_description = ctype.ctype,
+        )
+
+        db.add(new_ctype)
+        db.commit()
+        db.refresh(new_ctype)
+        return {"message": "Connection Type Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.delete('/delete-connection-type/')
+def delete_connection_type_view(current_user: user_dependency, ctype: str, db: Session=Depends(get_db)):
+    deleted = db.query(ConnectionTypes).filter(ConnectionTypes.ctype_description == ctype).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Connection Type not found")
+    
+    return {"message": "Connection Type has been deleted"}
+
+
+@app.post('/add-printer-feature/')
+def add_printer_feature_view(printer_feature: PrinterFeatureCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        new_printer_feature = PrinterFeatures(
+            feature_description = printer_feature.printer_feature,
+        )
+
+        db.add(new_printer_feature)
+        db.commit()
+        db.refresh(new_printer_feature)
+        return {"message": "Printer Feature Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+
+@app.delete('/delete-printer-feature/')
+def delete_printer_feature_view(current_user: user_dependency, printer_feature: str, db: Session=Depends(get_db)):
+    deleted = db.query(PrinterFeatures).filter(PrinterFeatures.feature_description == printer_feature).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="Printer Feature not found")
+    
+    return {"message": "Printer Feature has been deleted"}
+
+
+@app.get('/get-location-names/')
+def get_location_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Locations).all()
+
+@app.get("/get-all-locations/")
+def get_all_locations(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
+    """
+    Returns a list of all locations, 
+    each with the count of devices per category under that location.
+    """
+    try:
+        # Step 1: Get all locations
+        locations = db.query(Locations).all()
+
+        results = []
+
+        # Step 2: For each location, count devices by category
+        for loc in locations:
+            category_counts = (
+                db.query(Devices.category, func.count(Devices.devices_id))
+                .join(Divisions, Devices.division_id == Divisions.division_id)
+                .filter(Divisions.location_id == loc.location_id)
+                .group_by(Devices.category)
+                .all()
+            )
+
+            # Step 3: Format data
+            formatted_counts = [
+                {"category": category, "count": count} for category, count in category_counts
+            ]
+
+            results.append({
+                "location_name": loc.location_name,
+                "category_counts": formatted_counts
+            })
+
+        return results
+
+    except Exception as e:
+        print(f"Error fetching location data: {e}")
+        raise HTTPException(status_code=500, detail="Error retrieving location data.")
+    
+
+# =====================================================
+# GET FILTERED DEVICES BY LOCATION / STATUS / COMPONENT
+# =====================================================
+
+@app.post("/filter-devices/")
+def filter_devices(
+    filters: FilterRequest,
+    current_user: user_dependency,
+    db: Session = Depends(get_db)
+):
+    query = (
+        db.query(
+            Devices.devices_id,
+            Devices.category,
+            Devices.brand,
+            Devices.model,
+            Devices.serial_number,
+            Devices.inventory_number,
+            Devices.delivery_date,
+            SystemStatus.status_description,
+            Locations.location_name,
+        )
+        .join(SystemStatus, Devices.status_id == SystemStatus.status_id, isouter=True)
+        .join(Divisions, Devices.division_id == Divisions.division_id, isouter=True)
+        .join(Locations, Divisions.location_id == Locations.location_id, isouter=True)
+    )
+
+    # ✅ Step 3: Apply filters dynamically
+    if filters.locations:
+        query = query.filter(Locations.location_name.in_(filters.locations))
+
+    if filters.statuses:
+        query = query.filter(SystemStatus.status_description.in_(filters.statuses))
+
+    if filters.components:
+        query = query.filter(Devices.category.in_(filters.components))
+
+    results = query.all()
+
+    return [
+        {
+            "devices_id": r.devices_id,
+            "category": r.category,
+            "brand": r.brand,
+            "model": r.model,
+            "serial_number": r.serial_number,
+            "inventory_number": r.inventory_number,
+            "delivery_date": r.delivery_date,
+            "status_description": r.status_description,
+            "location_name": r.location_name,
+        }
+        for r in results
+    ]

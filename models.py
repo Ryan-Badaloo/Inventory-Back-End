@@ -1,14 +1,14 @@
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, Enum
+from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Float, DateTime, Date, Enum
 from sqlalchemy import ForeignKey
 from datetime import datetime, timedelta, timezone, date
 from pydantic import BaseModel
-
+from typing import List, Optional
 
 # Database Section
-# URL_DATABASE = "postgresql+psycopg2://postgres:password@localhost:5432/Test_DB"
-URL_DATABASE = "postgresql+psycopg2://admin:Pass0rd1@172.16.0.4:5434/computer_inventory"
+URL_DATABASE = "postgresql+psycopg2://postgres:password@localhost:5432/Test_DB"
+# URL_DATABASE = "postgresql+psycopg2://admin:Pass0rd1@172.16.0.4:5434/computer_inventory"
 engine = create_engine(URL_DATABASE)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -64,18 +64,44 @@ class Devices(Base):
 class SystemStatus(Base):
     __tablename__ = "system_status"
 
-    status_id = Column(Integer, primary_key=True, index=True)
+    status_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     status_description = Column(String(255), nullable=False)
+
+class CPUTypes(Base):
+    __tablename__ = "cpu_type"
+
+    cpu_type_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    cpu_type_description = Column(String(255), nullable=False)
+
+class ConnectionTypes(Base):
+    __tablename__ = "connection_type"
+
+    ctype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    ctype_description = Column(String(255), nullable=False)
+
+class PrinterFeatures (Base):
+    __tablename__ = "printer_feature"
+
+    feature_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    feature_description = Column(String(255), nullable=False)
 
 class Divisions(Base):
     __tablename__ = "division"
 
     division_id = Column(Integer, primary_key=True, index=True)
     division_name = Column(String(255), nullable=False)
-    location_id = Column(Integer)
+    location_id = Column(Integer, ForeignKey("location.location_id"))
     added_by = Column(String(255), nullable=False)
     date_added = Column(Date, nullable=True)
     devices_id = Column(Integer)
+
+class Comments(Base):
+    __tablename__ = "comments"
+
+    comment_id = Column(Integer, primary_key=True, index=True)
+    devices_id = Column(Integer)
+    comment_value = Column(Text)
+
 
 class Laptops(Base):
     __tablename__ = "laptop"
@@ -148,6 +174,17 @@ class CRAVEquipments(Base):
     devices_id = Column(Integer, ForeignKey("devices.devices_id"))
 
     device = relationship("Devices", backref="conference_room_av_equipment", uselist=False)
+
+class Locations(Base):
+    __tablename__ = "location"
+
+    location_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    location_name = Column(String(255), nullable=False)
+    parish_id = Column(Integer, ForeignKey("parish.parish_id"))
+    added_by = Column(String(255), nullable=False)
+    date_added = Column(Date, nullable=True)
+    ltype_id = Column(Integer, nullable=True)
+
 
 
 
@@ -231,3 +268,24 @@ class CRAVEquipmentRequest(DeviceRequest):
     name: str | None = None
     ip_address: str | None = None
     mac_address: str | None = None
+
+class StatusCreate(BaseModel):
+    status: str
+
+class CPUTypeCreate(BaseModel):
+    cpu_type: str
+
+class ConnectionTypeCreate(BaseModel):
+    ctype: str
+
+class PrinterFeatureCreate(BaseModel):
+    printer_feature: str
+
+class CommentCreate(BaseModel):
+    id: int
+    comment: str
+
+class FilterRequest(BaseModel):
+    locations: Optional[List[str]] = None
+    statuses: Optional[List[str]] = None
+    components: Optional[List[str]] = None
