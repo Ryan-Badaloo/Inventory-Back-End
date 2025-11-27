@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 from sqlalchemy import create_engine, Column, Integer, String, Text, Boolean, Float, DateTime, Date, Enum
@@ -6,10 +8,10 @@ from datetime import datetime, timedelta, timezone, date
 from pydantic import BaseModel
 from typing import List, Optional
 
-# Database Section
-# URL_DATABASE = "postgresql+psycopg2://postgres:password@localhost:5432/Test_DB"
-URL_DATABASE = "postgresql+psycopg2://admin:Pass0rd1@172.16.0.4:5434/computer_inventory"
-engine = create_engine(URL_DATABASE)
+load_dotenv()
+
+db_url = os.getenv("DATABASE_URL")
+engine = create_engine(db_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 
