@@ -7,8 +7,8 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 # Database Section
-URL_DATABASE = "postgresql+psycopg2://postgres:password@localhost:5432/Test_DB"
-# URL_DATABASE = "postgresql+psycopg2://admin:Pass0rd1@172.16.0.4:5434/computer_inventory"
+# URL_DATABASE = "postgresql+psycopg2://postgres:password@localhost:5432/Test_DB"
+URL_DATABASE = "postgresql+psycopg2://admin:Pass0rd1@172.16.0.4:5434/computer_inventory"
 engine = create_engine(URL_DATABASE)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -60,6 +60,12 @@ class Devices(Base):
     division_id = Column(Integer, ForeignKey("division.division_id"), nullable=True)
     client_id = Column(Integer, nullable=True)
     added_by = Column(String(255), nullable=True)
+    last_updated_by = Column(String(255), nullable=True)
+    repaired_date = Column(Date, nullable=True)
+    repaired_by = Column(String(255), nullable=True)
+    bos_date = Column(Date, nullable=True)
+    bos_by = Column(String(255), nullable=True)
+    deployed_by = Column(String(255), nullable=True)
 
 class SystemStatus(Base):
     __tablename__ = "system_status"
@@ -79,11 +85,6 @@ class ConnectionTypes(Base):
     ctype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     ctype_description = Column(String(255), nullable=False)
 
-class PrinterFeatures (Base):
-    __tablename__ = "printer_feature"
-
-    feature_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    feature_description = Column(String(255), nullable=False)
 
 class Divisions(Base):
     __tablename__ = "division"
@@ -164,6 +165,13 @@ class Printers(Base):
 
     device = relationship("Devices", backref="printer", uselist=False)
 
+class PrinterFeatures(Base):
+    __tablename__ = "printer_feature"
+
+    feature_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    feature_description = Column(String(255), nullable=False)
+
+
 class CRAVEquipments(Base):
     __tablename__ = "conference_room_av_equipment"
 
@@ -185,7 +193,26 @@ class Locations(Base):
     date_added = Column(Date, nullable=True)
     ltype_id = Column(Integer, nullable=True)
 
+class LocationTypes(Base):
+    __tablename__ = "location_type"
 
+    ltype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    ltype_name = Column(String(255), nullable=False)
+
+
+
+class Parishes(Base):
+    __tablename__ = "parish"
+
+    parish_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    parish_name = Column(String(255), nullable=False)
+
+class Roles(Base):
+    __tablename__ = "roles"
+
+    role_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    role_name = Column(String(255), nullable=False)
+    description = Column(String(255), nullable=False)
 
 
 
@@ -287,5 +314,13 @@ class CommentCreate(BaseModel):
 
 class FilterRequest(BaseModel):
     locations: Optional[List[str]] = None
+    parishes: Optional[List[str]] = None
     statuses: Optional[List[str]] = None
     components: Optional[List[str]] = None
+
+class FilterRequest(BaseModel):
+    locations: Optional[List[str]] = None
+    parishes: Optional[List[str]] = None
+    statuses: Optional[List[str]] = None
+    components: Optional[List[str]] = None
+

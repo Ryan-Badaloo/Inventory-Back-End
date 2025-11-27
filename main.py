@@ -390,15 +390,30 @@ def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, current_user: 
         raise HTTPException(status_code=400, detail=str(e))
  
 @app.get('/get-items/')
-def get_items_view(current_user: user_dependency, brand: Optional[str] = None, category: Optional[str] = None, db: Session=Depends(get_db)):
+def get_items_view(current_user: user_dependency, filter: Optional[str] = None, input: Optional[str] = None, db: Session=Depends(get_db)):
 
     query = db.query(Devices, SystemStatus.status_description, Divisions.division_name).outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id).outerjoin(Divisions, Devices.division_id == Divisions.division_id)
 
-    if brand:
-        query = query.filter(Devices.brand == brand)
+    if filter == "Device Type":
+        query = query.filter(Devices.category.ilike(f"%{input}%"))
 
-    if category:
-        query = query.filter(Devices.category == category)
+    if filter == "Status":
+        query = query.filter(SystemStatus.status_description.ilike(f"%{input}%"))
+
+    if filter == "Division":
+        query = query.filter(Divisions.division_name.ilike(f"%{input}%"))
+
+    if filter == "Serial Number":
+        query = query.filter(Devices.serial_number.ilike(f"%{input}%"))
+        
+    if filter == "Delivery Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.delivery_date == parsed_date)
+
+    if filter == "Deployment Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.deployment_date == parsed_date)
+
 
     rows = query.all()
     result_list = []
@@ -944,9 +959,91 @@ def get_all_locations(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
         raise HTTPException(status_code=500, detail="Error retrieving location data.")
     
 
+@app.get('/get-parish-names/')
+def get_parish_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Parishes).all()
+
 # =====================================================
 # GET FILTERED DEVICES BY LOCATION / STATUS / COMPONENT
 # =====================================================
+
+@app.get("/filter-delivery-date/")
+def filter_delivery_date(date: date, current_user: user_dependency, db: Session = Depends(get_db)):
+    query = (
+        db.query(
+            Devices.devices_id,
+            Devices.category,
+            Devices.brand,
+            Devices.model,
+            Devices.serial_number,
+            Devices.inventory_number,
+            Devices.delivery_date,
+            Divisions.division_name,
+            SystemStatus.status_description,
+        )
+        .join(Divisions, Devices.division_id == Divisions.division_id)
+        .join(SystemStatus, Devices.status_id == SystemStatus.status_id)
+    )
+
+    if date:
+        query = query.filter(Devices.delivery_date >= date)
+
+        results = query.all()
+
+    return [
+        {
+            "devices_id": r.devices_id,
+            "category": r.category,
+            "brand": r.brand,
+            "model": r.model,
+            "serial_number": r.serial_number,
+            "inventory_number": r.inventory_number,
+            "delivery_date": r.delivery_date,
+            "status_description": r.status_description,
+            "division_name": r.division_name,
+        }
+        for r in results
+    ]
+
+
+@app.get("/filter-deployment-date/")
+def filter_deployment_date(date: date, current_user: user_dependency, db: Session = Depends(get_db)):
+    query = (
+        db.query(
+            Devices.devices_id,
+            Devices.category,
+            Devices.brand,
+            Devices.model,
+            Devices.serial_number,
+            Devices.inventory_number,
+            Devices.deployment_date,
+            Divisions.division_name,
+            SystemStatus.status_description,
+        )
+        .join(Divisions, Devices.division_id == Divisions.division_id)
+        .join(SystemStatus, Devices.status_id == SystemStatus.status_id)
+    )
+
+    if date:
+        query = query.filter(Devices.deployment_date >= date)
+
+        results = query.all()
+
+    return [
+        {
+            "devices_id": r.devices_id,
+            "category": r.category,
+            "brand": r.brand,
+            "model": r.model,
+            "serial_number": r.serial_number,
+            "inventory_number": r.inventory_number,
+            "deployment_date": r.deployment_date,
+            "status_description": r.status_description,
+            "division_name": r.division_name,
+        }
+        for r in results
+    ]
+
 
 @app.post("/filter-devices/")
 def filter_devices(
@@ -969,11 +1066,16 @@ def filter_devices(
         .join(SystemStatus, Devices.status_id == SystemStatus.status_id, isouter=True)
         .join(Divisions, Devices.division_id == Divisions.division_id, isouter=True)
         .join(Locations, Divisions.location_id == Locations.location_id, isouter=True)
+        .join(Parishes, Locations.parish_id == Parishes.parish_id, isouter=True)
+        
     )
 
     # ✅ Step 3: Apply filters dynamically
     if filters.locations:
         query = query.filter(Locations.location_name.in_(filters.locations))
+
+    if filters.parishes:
+        query = query.filter(Parishes.parish_name.in_(filters.parishes))
 
     if filters.statuses:
         query = query.filter(SystemStatus.status_description.in_(filters.statuses))
@@ -997,3 +1099,7 @@ def filter_devices(
         }
         for r in results
     ]
+
+@app.get('/get-items-delivery-date/')
+def get_items_delivery_date_view(delivery_date: date, current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Devices).filter(Devices.delivery_date > delivery_date).all()
