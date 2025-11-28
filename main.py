@@ -1,6 +1,9 @@
-from passlib.context import CryptContext
 import os
+from dotenv import load_dotenv 
+import logging
+from passlib.context import CryptContext
 from datetime import datetime, timedelta, date
+from contextlib import asynccontextmanager
 from typing import Union, Any, Optional, List, Annotated, Dict
 from jose import jwt, JWTError
 from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_, desc, func
@@ -16,18 +19,76 @@ from sqlalchemy.exc import SQLAlchemyError
 from enum import Enum
 from models import *
 
-app = FastAPI()
+load_dotenv()
 
-SECRET_KEY = 'my_secret_key'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES =30
+app = FastAPI(
+    title="Computer Inventory Backend",
+    description="This application contains the backend logic to create, edit, manage and get data related to the Computer Inventory.",
+    version="1.0.0",
+)
+
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM')
+ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+ORGIN = os.getenv('ORGIN')
+USERNAME = os.getenv('Defualt_Username')
+PASSWORD = os.getenv('Defualt_Password')
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+db_dependency = Annotated[Session, Depends(get_db)]
+
+# This function creates a defualt use in database
+def defualt_user():
+    db:Session = SessionLocal()
+    try:
+
+        defualt_user = db.query(Users).filter(
+            Users.email == ""
+        ).first()
+
+        if not defualt_user:
+            logging.info("Creating defualt user ...")
+
+            new_user = Users(
+                firstname = "ICT",
+                lastname = "DEV",
+                email = USERNAME,
+                password = PASSWORD,
+                role_id = 1,
+                active = True,
+                date_created = date.today() ,
+                last_updated = None
+            )
+
+            db.add(new_user)
+            db.commit()
+
+            logging.info("Ddefualt user added.")
+        else:
+            logging.info("Defualt user already exists.")
+
+    except Exception as e:
+        logging.error(f"Error in creating defualt user: {str(e)}")
+    finally:
+        db.close()
+
+@asynccontextmanager
+async def lifespan(application: FastAPI):
+    logging.info("Application start up ...")
+    defualt_user()
+    yield
+    logging.info("Application shutting down")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-origins = [
-    "http://localhost:5173",  # frontend origin
-]
+origins = [ ORGIN ]
 
 app.add_middleware(
     CORSMiddleware,
@@ -39,20 +100,7 @@ app.add_middleware(
 
 
 
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
-
-db_dependency = Annotated[Session, Depends(get_db)]
-
-
-
 # THIS IS THE SECTION THAT DEFINES FUNCTIONS #################################################################
-
 async def get_current_user(db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -109,9 +157,6 @@ def authenticate_user(db, username: str, password: str):
     if not verify_password(password, user.password):
         return False
     return user
-    
-
-
 
 # THIS IS THE SECTION THAT DEFINES API'S ####################################################################
 

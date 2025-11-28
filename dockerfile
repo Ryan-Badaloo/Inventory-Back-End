@@ -16,4 +16,4 @@ RUN pip3 install --no-cache-dir --upgrade pip \
 COPY . .
 
 EXPOSE 8000
-CMD ["",""]
+CMD ["bash","startup.sh"]
