@@ -99,7 +99,6 @@ app.add_middleware(
 )
 
 
-
 # THIS IS THE SECTION THAT DEFINES FUNCTIONS #################################################################
 async def get_current_user(db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
