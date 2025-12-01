@@ -1,5 +1,5 @@
-from passlib.context import CryptContext
 import os
+from passlib.context import CryptContext #passlib.context import CryptContext
 from datetime import datetime, timedelta, date
 from typing import Union, Any, Optional, List, Annotated, Dict
 from jose import jwt, JWTError
@@ -824,15 +824,25 @@ def add_status_view(status: StatusCreate, current_user: user_dependency, db: Ses
         raise HTTPException(status_code=400, detail=str(e))
 
 
-@app.delete('/delete-status/')
-def delete_status_view(current_user: user_dependency, status: str, db: Session=Depends(get_db)):
-    deleted = db.query(SystemStatus).filter(SystemStatus.status_description == status).delete()
+@app.delete("/delete-status/")
+def delete_status_view(
+    current_user: user_dependency,
+    status: str,
+    db: Session = Depends(get_db)
+):
+
+    status_record = db.query(SystemStatus).filter(SystemStatus.status_description == status).first()
+
+    if not status_record:
+        raise HTTPException(status_code=404, detail="Status not found")
+
+    # Set status to NULL for all devices using this status
+    db.query(Devices).filter(Devices.status_id == status_record.status_id).update({Devices.status_id: None})
+
+    db.delete(status_record)
     db.commit()
 
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="Device not found")
-    
-    return {"message": "Device has been deleted"}
+    return {"message": "Status deleted and devices updated"}
     
 
 
