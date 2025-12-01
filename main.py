@@ -20,12 +20,6 @@ from models import *
 
 load_dotenv()
 
-app = FastAPI(
-    title="Computer Inventory Backend",
-    description="This application contains the backend logic to create, edit, manage and get data related to the Computer Inventory.",
-    version="1.0.0",
-)
-
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
@@ -44,29 +38,30 @@ db_dependency = Annotated[Session, Depends(get_db)]
 
 # This function creates a defualt use in database
 def defualt_user():
+
     db:Session = SessionLocal()
+
     try:
 
-        defualt_user = db.query(Users).filter(
-            Users.email == ""
-        ).first()
+        defualt_user = db.query(Users).filter(Users.email == USERNAME).first()
 
         if not defualt_user:
             logging.info("Creating defualt user ...")
 
-            new_user = Users(
+            user = Users(
                 firstname = "ICT",
                 lastname = "DEV",
                 email = USERNAME,
                 password = PASSWORD,
                 role_id = 1,
                 active = True,
-                date_created = date.today() ,
-                last_updated = None
+                date_created = date.today(),
+                last_updated = None,
             )
 
-            db.add(new_user)
+            db.add(user)
             db.commit()
+            db.refresh(user)
 
             logging.info("Ddefualt user added.")
         else:
@@ -77,6 +72,11 @@ def defualt_user():
     finally:
         db.close()
 
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+origins = [ ORGIN ]
+
 @asynccontextmanager
 async def lifespan(application: FastAPI):
     logging.info("Application start up ...")
@@ -84,10 +84,12 @@ async def lifespan(application: FastAPI):
     yield
     logging.info("Application shutting down")
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-origins = [ ORGIN ]
+app = FastAPI(
+    title="Computer Inventory Backend",
+    description="This application contains the backend logic to create, edit, manage and get data related to the Computer Inventory.",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 app.add_middleware(
     CORSMiddleware,
@@ -96,7 +98,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 # THIS IS THE SECTION THAT DEFINES FUNCTIONS #################################################################
 async def get_current_user(db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
