@@ -22,7 +22,7 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 ORGIN = os.getenv('ORGIN')
 USERNAME = os.getenv('Defualt_Username')
 PASSWORD = os.getenv('Defualt_Password')
@@ -436,7 +436,92 @@ def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, current_user: 
 @app.get('/get-items/')
 def get_items_view(current_user: user_dependency, filter: Optional[str] = None, input: Optional[str] = None, db: Session=Depends(get_db)):
 
-    query = db.query(Devices, SystemStatus.status_description, Divisions.division_name).outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id).outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+    query = (
+        db.query(
+            Devices, 
+            SystemStatus.status_description, 
+            Divisions.division_name, 
+            Clients.firstname,
+            Clients.lastname,
+        )
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
+    )
+    if filter == "Device Type":
+        query = query.filter(Devices.category.ilike(f"%{input}%"))
+
+    if filter == "Status":
+        query = query.filter(SystemStatus.status_description.ilike(f"%{input}%"))
+
+    if filter == "Division":
+        query = query.filter(Divisions.division_name.ilike(f"%{input}%"))
+
+    if filter == "Serial Number":
+        query = query.filter(Devices.serial_number.ilike(f"%{input}%"))
+        
+    if filter == "Delivery Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.delivery_date == parsed_date)
+
+    if filter == "Deployment Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.deployment_date == parsed_date)
+
+    if filter == "Client":
+        query = query.filter(
+            or_(
+                Clients.firstname.ilike(f"%{input}%"),
+                Clients.lastname.ilike(f"%{input}%"),
+            )
+        )
+
+
+    rows = query.all()
+    result_list = []
+
+    for device, status_description, division_name, firstname, lastname in rows:
+        client_name = None
+        if firstname or lastname:
+            client_name = f"{firstname or ''} {lastname or ''}".strip()
+        item = {
+            "devices_id": device.devices_id,
+            "category": device.category,
+            "brand": device.brand,
+            "model": device.model,
+            "serial_number": device.serial_number,
+            "inventory_number": device.inventory_number,
+            "delivery_date": device.delivery_date,
+            "deployment_date": device.deployment_date,
+            "status_id": device.status_id,
+            "division_id": device.division_id,
+            "status_description": status_description,
+            "division_name": division_name,
+            "client_id": device.client_id,
+            "client_name": client_name, 
+        }
+        result_list.append(item)
+
+
+    return result_list
+
+@app.get('/get-assigned-items/')
+def get_items_view(current_user: user_dependency, filter: Optional[str] = None, input: Optional[str] = None, db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+            Devices, 
+            SystemStatus.status_description, 
+            Divisions.division_name, 
+            Clients.firstname,
+            Clients.lastname,
+        )
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
+    )
+
+    query = query.filter(Devices.client_id != None)
 
     if filter == "Device Type":
         query = query.filter(Devices.category.ilike(f"%{input}%"))
@@ -458,11 +543,23 @@ def get_items_view(current_user: user_dependency, filter: Optional[str] = None, 
         parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
         query = query.filter(Devices.deployment_date == parsed_date)
 
+    if filter == "Client":
+        query = query.filter(
+            or_(
+                Clients.firstname.ilike(f"%{input}%"),
+                Clients.lastname.ilike(f"%{input}%"),
+                (Clients.firstname + " " + Clients.lastname).ilike(f"%{input}%"),
+            )
+        )
+
 
     rows = query.all()
     result_list = []
 
-    for device, status_description, division_name in rows:
+    for device, status_description, division_name, firstname, lastname in rows:
+        client_name = None
+        if firstname or lastname:
+            client_name = f"{firstname or ''} {lastname or ''}".strip()
         item = {
             "devices_id": device.devices_id,
             "category": device.category,
@@ -476,6 +573,8 @@ def get_items_view(current_user: user_dependency, filter: Optional[str] = None, 
             "division_id": device.division_id,
             "status_description": status_description,
             "division_name": division_name,
+            "client_id": device.client_id,
+            "client_name": client_name, 
         }
         result_list.append(item)
 
@@ -735,6 +834,18 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
         raise HTTPException(status_code=404, detail="Device not found")
     
     return {"message": "Device has been deleted"}
+
+@app.post('/unassign-item/')
+def delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
+    device = db.query(Devices).filter(Devices.serial_number == serial_number).first()
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    device.client_id = None
+    db.commit()
+
+    return {"message": "Device has been unassigned from the client"}
 
 
 
