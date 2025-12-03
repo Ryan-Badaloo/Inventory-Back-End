@@ -22,10 +22,8 @@ load_dotenv()
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
-ACCESS_TOKEN_EXPIRE_MINUTES = os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES')
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 ORGIN = os.getenv('ORGIN')
-USERNAME = os.getenv('Defualt_Username')
-PASSWORD = os.getenv('Defualt_Password')
 
 def get_db():
     db = SessionLocal()
@@ -43,7 +41,7 @@ def defualt_user():
 
     try:
 
-        defualt_user = db.query(Users).filter(Users.email == USERNAME).first()
+        defualt_user = db.query(Users).filter(Users.email == "admin").first()
 
         if not defualt_user:
             logging.info("Creating defualt user ...")
@@ -51,8 +49,8 @@ def defualt_user():
             user = Users(
                 firstname = "ICT",
                 lastname = "DEV",
-                email = USERNAME,
-                password = PASSWORD,
+                email = "admin",
+                password = pwd_context.hash("password"),
                 role_id = 1,
                 active = True,
                 date_created = date.today(),
@@ -78,7 +76,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 origins = [ ORGIN ]
 
 @asynccontextmanager
-async def lifespan(application: FastAPI):
+async def lifespan(application:FastAPI):
+
     logging.info("Application start up ...")
     defualt_user()
     yield
