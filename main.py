@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from typing import Union, Any, Optional, List, Annotated, Dict
 from passlib.context import CryptContext
 from jose import jwt, JWTError
-from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_, desc, func
+from sqlalchemy import create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_, and_, desc, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
@@ -24,6 +24,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 ORGIN = os.getenv('ORGIN')
+USERNAME = os.getenv('Defualt_Username')
+PASSWORD = os.getenv('Defualt_Password')
 
 def get_db():
     db = SessionLocal()
@@ -41,7 +43,7 @@ def defualt_user():
 
     try:
 
-        defualt_user = db.query(Users).filter(Users.email == "admin").first()
+        defualt_user = db.query(Users).filter(Users.email == USERNAME).first()
 
         if not defualt_user:
             logging.info("Creating defualt user ...")
@@ -49,8 +51,8 @@ def defualt_user():
             user = Users(
                 firstname = "ICT",
                 lastname = "DEV",
-                email = "admin",
-                password = pwd_context.hash("password"),
+                email = USERNAME,
+                password = PASSWORD,
                 role_id = 1,
                 active = True,
                 date_created = date.today(),
@@ -76,8 +78,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 origins = [ ORGIN ]
 
 @asynccontextmanager
-async def lifespan(application:FastAPI):
-
+async def lifespan(application: FastAPI):
     logging.info("Application start up ...")
     defualt_user()
     yield
@@ -177,6 +178,46 @@ async def create_user(user_model: CreateUserRequest, db: Session=Depends(get_db)
     db.commit()
     db.refresh(user)
     return {"message": "User created successfully"}
+
+@app.post("/change-password/", status_code=status.HTTP_200_OK)
+async def change_password(password_set: ChangePasswordRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    user = db.query(Users).filter(Users.email == current_user.email).first()
+
+    if user:
+        if verify_password(password_set.old_password, user.password):
+            new_hashed_password = get_password_hash(password_set.new_password)
+            user.password = new_hashed_password
+            db.commit()
+            db.refresh(user)
+            return {"message": "Password updated successfully"}
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Incorrect password"
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+
+@app.post("/change-user-password/", status_code=status.HTTP_200_OK)
+async def change_user_password(user_password_set: ChangeUserPasswordRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    user = db.query(Users).filter(Users.email == user_password_set.email).first()
+
+    if user:
+        new_hashed_password = get_password_hash(user_password_set.new_password)
+        user.password = new_hashed_password
+        db.commit()
+        db.refresh(user)
+        return {"message": "Password updated successfully"}
+    
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
 
 
 @app.delete('/delete-user/')
@@ -447,6 +488,81 @@ def get_items_view(current_user: user_dependency, filter: Optional[str] = None, 
         .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
         .outerjoin(Clients, Devices.client_id == Clients.client_id)
     )
+    if filter == "Device Type":
+        query = query.filter(Devices.category.ilike(f"%{input}%"))
+
+    if filter == "Status":
+        query = query.filter(SystemStatus.status_description.ilike(f"%{input}%"))
+
+    if filter == "Division":
+        query = query.filter(Divisions.division_name.ilike(f"%{input}%"))
+
+    if filter == "Serial Number":
+        query = query.filter(Devices.serial_number.ilike(f"%{input}%"))
+        
+    if filter == "Delivery Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.delivery_date == parsed_date)
+
+    if filter == "Deployment Date":
+        parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
+        query = query.filter(Devices.deployment_date == parsed_date)
+
+    if filter == "Client":
+        query = query.filter(
+            or_(
+                Clients.firstname.ilike(f"%{input}%"),
+                Clients.lastname.ilike(f"%{input}%"),
+            )
+        )
+
+
+    rows = query.all()
+    result_list = []
+
+    for device, status_description, division_name, firstname, lastname in rows:
+        client_name = None
+        if firstname or lastname:
+            client_name = f"{firstname or ''} {lastname or ''}".strip()
+        item = {
+            "devices_id": device.devices_id,
+            "category": device.category,
+            "brand": device.brand,
+            "model": device.model,
+            "serial_number": device.serial_number,
+            "inventory_number": device.inventory_number,
+            "delivery_date": device.delivery_date,
+            "deployment_date": device.deployment_date,
+            "status_id": device.status_id,
+            "division_id": device.division_id,
+            "status_description": status_description,
+            "division_name": division_name,
+            "client_id": device.client_id,
+            "client_name": client_name, 
+        }
+        result_list.append(item)
+
+
+    return result_list
+
+@app.get('/get-unassigned-items/')
+def get__unassigned_items_view(current_user: user_dependency, filter: Optional[str] = None, input: Optional[str] = None, db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+            Devices, 
+            SystemStatus.status_description, 
+            Divisions.division_name, 
+            Clients.firstname,
+            Clients.lastname,
+        )
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
+    )
+
+    query = query.filter(Devices.client_id == None)
+
     if filter == "Device Type":
         query = query.filter(Devices.category.ilike(f"%{input}%"))
 
@@ -889,6 +1005,16 @@ def get_client_view(current_user: user_dependency, name: Optional[str] = None, d
     else:
         return db.query(Clients).all()
     
+@app.get('/get-users/')
+def get_client_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
+
+    if name:
+        search = f"%{name.strip()}%"
+        query = db.query(Users).filter((Users.firstname + " " + Users.lastname).ilike(search)).all()
+        return query
+    else:
+        return db.query(Users).all()
+    
 
 
 
@@ -919,10 +1045,18 @@ def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db
 def assign_device_view(current_user: user_dependency, device_sn: str, client_id: int, db: Session=Depends(get_db)):
     device = db.query(Devices).filter(Devices.serial_number == device_sn).first()
 
-    device.client_id = client_id
-    db.commit()
-    db.refresh(device)
-    return {"message": "Device assigned successfully", "item_id": device.devices_id, "client": client_id}
+    if device:
+        device.client_id = client_id
+        device.assigned_on = datetime.now().strftime("%Y-%m-%d")
+        db.commit()
+        db.refresh(device)
+        return {"message": "Device assigned successfully", "item_id": device.devices_id, "client": client_id}
+    
+    else:
+        raise HTTPException(
+            status_code=404,
+            detail="Device not found"
+        )
 
 
 @app.get('/get-comments/')
@@ -1127,9 +1261,7 @@ def get_all_locations(db: Session = Depends(get_db)) -> List[Dict[str, Any]]:
 def get_parish_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Parishes).all()
 
-# =====================================================
-# GET FILTERED DEVICES BY LOCATION / STATUS / COMPONENT
-# =====================================================
+
 
 @app.get("/filter-delivery-date/")
 def filter_delivery_date(date: date, current_user: user_dependency, db: Session = Depends(get_db)):
@@ -1267,3 +1399,74 @@ def filter_devices(
 @app.get('/get-items-delivery-date/')
 def get_items_delivery_date_view(delivery_date: date, current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Devices).filter(Devices.delivery_date > delivery_date).all()
+
+@app.get('/filter-being-repaired/')
+def filter_being_repaired(current_user: user_dependency, db: Session=Depends(get_db)):
+    query = (
+        db.query(
+            Devices.devices_id,
+            Devices.category,
+            Devices.brand,
+            Devices.model,
+            Devices.serial_number,
+            Devices.inventory_number,
+            Devices.delivery_date,
+            Divisions.division_name,
+            SystemStatus.status_description,
+            Clients.firstname,
+            Clients.lastname,
+        )
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
+    )
+
+    query = query.filter(Devices.status_id == 2)
+
+    results = query.all()
+
+    return [
+        {
+            "devices_id": r.devices_id,
+            "category": r.category,
+            "brand": r.brand,
+            "model": r.model,
+            "serial_number": r.serial_number,
+            "inventory_number": r.inventory_number,
+            "delivery_date": r.delivery_date,
+            "status_description": r.status_description,
+            "division_name": r.division_name,
+            "client_first_name": r.firstname,
+            "client_last_name": r.lastname,
+        }
+        for r in results
+    ]
+
+@app.post("/update-status/", status_code=status.HTTP_201_CREATED)
+async def update_status(status_box: UpdateStatusRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    existing_statuses = db.query(SystemStatus.status_id).all()
+    existing_statuses = [row[0] for row in existing_statuses]
+    device = db.query(Devices).filter(Devices.serial_number == status_box.serial_number).first()
+
+    if not device:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    elif status_box.new_status not in existing_statuses:
+        raise HTTPException(status_code=404, detail="Status not found")
+    
+    elif device.status_id == status_box.new_status:
+        raise HTTPException(status_code=404, detail="Device already has this status")
+    
+    else:
+        if device.status_id == 2 and status_box.new_status == 1:
+            device.repaired_date = datetime.now().strftime("%Y-%m-%d")
+            device.repaired_by = current_user.firstname + " " + current_user.lastname
+
+        device.status_id = status_box.new_status
+
+        db.commit()
+        db.refresh(device)
+        return device
+    
+
+        
