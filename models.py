@@ -55,7 +55,7 @@ class Devices(Base):
     brand = Column(String(255), nullable=False)
     model = Column(String(255), unique=True, nullable=False)
     serial_number = Column(String(255), nullable=False)
-    inventory_number = Column(Integer, nullable=True)
+    inventory_number = Column(String(255), nullable=True)
     delivery_date = Column(Date, nullable=True)
     deployment_date = Column(Date, nullable=True)
     status_id = Column(Integer, ForeignKey("system_status.status_id"), nullable=True)
@@ -68,6 +68,8 @@ class Devices(Base):
     bos_date = Column(Date, nullable=True)
     bos_by = Column(String(255), nullable=True)
     deployed_by = Column(String(255), nullable=True)
+    assigned_on = Column(Date, nullable=True)
+    unassigned_on = Column(Date, nullable=True)
 
 class SystemStatus(Base):
     __tablename__ = "system_status"
@@ -250,7 +252,7 @@ class DeviceRequest(BaseModel):
     brand: str | None = None
     model: str | None = None
     serial_number: str | None = None
-    inventory_number: int | None = None
+    inventory_number: str | None = None
     delivery_date: date | None = None
     deployment_date: date | None = None
     status_id: int | None = None
@@ -325,4 +327,18 @@ class FilterRequest(BaseModel):
     parishes: Optional[List[str]] = None
     statuses: Optional[List[str]] = None
     components: Optional[List[str]] = None
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str
+
+class ChangeUserPasswordRequest(BaseModel):
+    email: str
+    new_password: str
+
+class UpdateStatusRequest(BaseModel):
+    serial_number: str
+    new_status: int
+
+
 
