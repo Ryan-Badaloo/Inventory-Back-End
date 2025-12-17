@@ -1,4 +1,4 @@
-FROM python:3.12-alpine3.22
+FROM python:3.12-alpine
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
@@ -6,8 +6,8 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 COPY requirements.txt .
-COPY startup.sh .
-COPY requirements.txt .
+
+RUN apk add --no-cache netcat-openbsd
 
 RUN pip3 install --no-cache-dir --upgrade pip \
     && pip3 install --no-cache-dir -r requirements.txt \
@@ -15,5 +15,8 @@ RUN pip3 install --no-cache-dir --upgrade pip \
 
 COPY . .
 
+# Fix Windows CRLF line endings and make script executable
+RUN sed -i 's/\r$//' start_backend.sh && chmod +x start_backend.sh
+
 EXPOSE 8000
-CMD ["bash","startup.sh"]
+CMD ["sh", "start_backend.sh"]
