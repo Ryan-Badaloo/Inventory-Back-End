@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-echo "Waiting for PostgreSQL to become available..."
+echo "Waiting to connect to database...."
 
 until nc -z "$DB_HOST" "$DB_PORT"; do
   echo "Database unavailable, waiting..."
@@ -14,4 +14,4 @@ echo "Running migrations..."
 alembic upgrade head
 
 echo "Starting backend..."
-exec gunicorn main:app -w 1 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 60
+exec gunicorn main:app -w 2 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000 --timeout 60
