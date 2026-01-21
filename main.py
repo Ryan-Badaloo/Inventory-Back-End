@@ -942,11 +942,13 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
 
 @app.delete('/delete-item/')
 def delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
-    deleted = db.query(Devices).filter(Devices.serial_number == serial_number).delete()
-    db.commit()
+    deleted = db.query(Devices).filter(Devices.serial_number == serial_number).first()
 
-    if deleted == 0:
+    if not deleted:
         raise HTTPException(status_code=404, detail="Device not found")
+    
+    db.delete(deleted)
+    db.commit()
     
     return {"message": "Device has been deleted"}
 
@@ -1110,6 +1112,22 @@ def add_status_view(status: StatusCreate, current_user: user_dependency, db: Ses
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post('/add-division/')
+def add_division_view(division: DivisionCreate, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        new_division = Divisions(
+            division_name = division.division,
+            added_by = current_user.firstname + " " + current_user.lastname,
+        )
+
+        db.add(new_division)
+        db.commit()
+        db.refresh(new_division)
+        return {"message": "Division Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 @app.delete("/delete-status/")
@@ -1131,6 +1149,26 @@ def delete_status_view(
     db.commit()
 
     return {"message": "Status deleted and devices updated"}
+
+@app.delete("/delete-division/")
+def delete_status_view(
+    current_user: user_dependency,
+    division: str,
+    db: Session = Depends(get_db)
+):
+
+    division_record = db.query(Divisions).filter(Divisions.division_name == division).first()
+
+    if not division_record:
+        raise HTTPException(status_code=404, detail="Division not found")
+
+    # Set status to NULL for all devices using this status
+    db.query(Devices).filter(Devices.division_id == division_record.division_id).update({Devices.status_id: None})
+
+    db.delete(division_record)
+    db.commit()
+
+    return {"message": "Division deleted and devices updated"}
     
 
 

@@ -71,6 +71,8 @@ class Devices(Base):
     assigned_on = Column(Date, nullable=True)
     unassigned_on = Column(Date, nullable=True)
 
+    comments = relationship("Comments", back_populates="device", cascade="all, delete-orphan", passive_deletes=True)
+
 class SystemStatus(Base):
     __tablename__ = "system_status"
 
@@ -96,7 +98,7 @@ class Divisions(Base):
     division_id = Column(Integer, primary_key=True, index=True)
     division_name = Column(String(255), nullable=False)
     location_id = Column(Integer, ForeignKey("location.location_id"))
-    added_by = Column(String(255), nullable=False)
+    added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
     devices_id = Column(Integer)
 
@@ -104,8 +106,10 @@ class Comments(Base):
     __tablename__ = "comments"
 
     comment_id = Column(Integer, primary_key=True, index=True)
-    devices_id = Column(Integer)
+    devices_id = Column(Integer, ForeignKey(Devices.devices_id, ondelete="CASCADE"), nullable=False)
     comment_value = Column(Text)
+
+    device = relationship(Devices, back_populates="comments")
 
 
 class Laptops(Base):
@@ -302,6 +306,9 @@ class CRAVEquipmentRequest(DeviceRequest):
 
 class StatusCreate(BaseModel):
     status: str
+
+class DivisionCreate(BaseModel):
+    division: str
 
 class CPUTypeCreate(BaseModel):
     cpu_type: str
