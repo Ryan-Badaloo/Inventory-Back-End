@@ -19,11 +19,11 @@ class Users(Base):
     __tablename__ = "users"
 
     user_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    firstname = Column(String(255), nullable=False)
-    lastname = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
-    password = Column(String, nullable=False)
-    role_id = Column(Integer, nullable=False)
+    firstname = Column(String(255), nullable=True)
+    lastname = Column(String(255), nullable=True)
+    email = Column(String(255), unique=True, nullable=True)
+    password = Column(String, nullable=True)
+    role_id = Column(Integer, nullable=True)
     active = Column(Boolean, nullable=True)
     date_created = Column(Date, nullable=True)
     last_updated = Column(Date, nullable=True)
@@ -32,9 +32,9 @@ class Clients(Base):
     __tablename__ = "clients"
 
     client_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    firstname = Column(String(255), nullable=False)
-    lastname = Column(String(255), nullable=False)
-    email = Column(String(255), unique=True, nullable=False)
+    firstname = Column(String(255), nullable=True)
+    lastname = Column(String(255), nullable=True)
+    email = Column(String(255), unique=True, nullable=True)
     phone_number = Column(String(255), nullable=True)
     position = Column(String(255), nullable=True)
     devices_id = Column(Integer, nullable=True)
@@ -44,17 +44,17 @@ class Clients(Base):
     division_id = Column(Integer, nullable=True)
     date_created = Column(Date, nullable=True)
     last_updated = Column(Date, nullable=True)
-    added_by = Column(String(255), nullable=False)
+    added_by = Column(String(255), nullable=True)
 
 
 class Devices(Base):
     __tablename__ = "devices"
 
     devices_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    category = Column(String(255), nullable=False)
-    brand = Column(String(255), nullable=False)
-    model = Column(String(255), unique=True, nullable=False)
-    serial_number = Column(String(255), nullable=False)
+    category = Column(String(255), nullable=True)
+    brand = Column(String(255), nullable=True)
+    model = Column(String(255), unique=True, nullable=True)
+    serial_number = Column(String(255), nullable=True)
     inventory_number = Column(String(255), nullable=True)
     delivery_date = Column(Date, nullable=True)
     deployment_date = Column(Date, nullable=True)
@@ -77,26 +77,26 @@ class SystemStatus(Base):
     __tablename__ = "system_status"
 
     status_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    status_description = Column(String(255), nullable=False)
+    status_description = Column(String(255), nullable=True)
 
 class CPUTypes(Base):
     __tablename__ = "cpu_type"
 
     cpu_type_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    cpu_type_description = Column(String(255), nullable=False)
+    cpu_type_description = Column(String(255), nullable=True)
 
 class ConnectionTypes(Base):
     __tablename__ = "connection_type"
 
     ctype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ctype_description = Column(String(255), nullable=False)
+    ctype_description = Column(String(255), nullable=True)
 
 
 class Divisions(Base):
     __tablename__ = "division"
 
     division_id = Column(Integer, primary_key=True, index=True)
-    division_name = Column(String(255), nullable=False)
+    division_name = Column(String(255), nullable=True)
     location_id = Column(Integer, ForeignKey("location.location_id"))
     added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
@@ -117,16 +117,16 @@ class Laptops(Base):
 
     laptop_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     cpu_type_id = Column(Integer, nullable=False)
-    hard_disk_capacity = Column(String(255), nullable=False)
-    memory_capacity = Column(String(255), nullable=False)
-    processor_speed = Column(String(255), nullable=False)
-    processor_type = Column(String(255), nullable=False)
-    computer_name = Column(String(255), nullable=False)
-    mac_address = Column(String(255), nullable=False)
-    operating_system = Column(String(255), nullable=False)
-    microsoft_office_version = Column(String(255), nullable=False)
-    antivirus = Column(String(255), nullable=False)
-    pdf_reader = Column(String(255), nullable=False)
+    hard_disk_capacity = Column(String(255), nullable=True)
+    memory_capacity = Column(String(255), nullable=True)
+    processor_speed = Column(String(255), nullable=True)
+    processor_type = Column(String(255), nullable=True)
+    computer_name = Column(String(255), nullable=True)
+    mac_address = Column(String(255), nullable=True)
+    operating_system = Column(String(255), nullable=True)
+    microsoft_office_version = Column(String(255), nullable=True)
+    antivirus = Column(String(255), nullable=True)
+    pdf_reader = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     return_date = Column(Date, nullable=True)
@@ -139,11 +139,11 @@ class Tablets(Base):
     __tablename__ = "tablet"
 
     tablet_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    imei_number = Column(String(255), nullable=False)
-    operating_system = Column(String(255), nullable=False)
-    version = Column(String(255), nullable=False)
-    hard_disk_capacity = Column(String(255), nullable=False)
-    memory_capacity = Column(String(255), nullable=False)
+    imei_number = Column(String(255), nullable=True)
+    operating_system = Column(String(255), nullable=True)
+    version = Column(String(255), nullable=True)
+    hard_disk_capacity = Column(String(255), nullable=True)
+    memory_capacity = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     return_date = Column(Date, nullable=True)
@@ -166,9 +166,9 @@ class Printers(Base):
     __tablename__ = "printer"
 
     printer_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ip_address = Column(String(255), nullable=False)
-    feature_id = Column(Integer, nullable=False)
-    connection_type_id = Column(Integer, nullable=False)
+    ip_address = Column(String(255), nullable=True)
+    feature_id = Column(Integer, nullable=True)
+    connection_type_id = Column(Integer, nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id"))
 
     device = relationship("Devices", backref="printer", uselist=False)
@@ -177,16 +177,16 @@ class PrinterFeatures(Base):
     __tablename__ = "printer_feature"
 
     feature_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    feature_description = Column(String(255), nullable=False)
+    feature_description = Column(String(255), nullable=True)
 
 
 class CRAVEquipments(Base):
     __tablename__ = "conference_room_av_equipment"
 
     cr_equipment_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    name = Column(String(255), nullable=False)
-    ip_address = Column(String(255), nullable=False)
-    mac_address = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=True)
+    ip_address = Column(String(255), nullable=True)
+    mac_address = Column(String(255), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id"))
 
     device = relationship("Devices", backref="conference_room_av_equipment", uselist=False)
@@ -195,9 +195,9 @@ class Locations(Base):
     __tablename__ = "location"
 
     location_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    location_name = Column(String(255), nullable=False)
+    location_name = Column(String(255), nullable=True)
     parish_id = Column(Integer, ForeignKey("parish.parish_id"))
-    added_by = Column(String(255), nullable=False)
+    added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
     ltype_id = Column(Integer, nullable=True)
 
@@ -205,7 +205,7 @@ class LocationTypes(Base):
     __tablename__ = "location_type"
 
     ltype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ltype_name = Column(String(255), nullable=False)
+    ltype_name = Column(String(255), nullable=True)
 
 
 
@@ -213,14 +213,14 @@ class Parishes(Base):
     __tablename__ = "parish"
 
     parish_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    parish_name = Column(String(255), nullable=False)
+    parish_name = Column(String(255), nullable=True)
 
 class Roles(Base):
     __tablename__ = "roles"
 
     role_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    role_name = Column(String(255), nullable=False)
-    description = Column(String(255), nullable=False)
+    role_name = Column(String(255), nullable=True)
+    description = Column(String(255), nullable=True)
 
 
 
