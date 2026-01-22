@@ -1,8 +1,8 @@
-"""initail commit
+"""Initial_DB
 
-Revision ID: 56b1aff527ad
+Revision ID: 895b2eb7cea2
 Revises: 
-Create Date: 2025-12-02 15:47:26.538569
+Create Date: 2026-01-22 10:59:58.982252
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '56b1aff527ad'
+revision: str = '895b2eb7cea2'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -40,13 +40,6 @@ def upgrade() -> None:
     sa.UniqueConstraint('email')
     )
     op.create_index(op.f('ix_clients_client_id'), 'clients', ['client_id'], unique=False)
-    op.create_table('comments',
-    sa.Column('comment_id', sa.Integer(), nullable=False),
-    sa.Column('devices_id', sa.Integer(), nullable=True),
-    sa.Column('comment_value', sa.Text(), nullable=True),
-    sa.PrimaryKeyConstraint('comment_id')
-    )
-    op.create_index(op.f('ix_comments_comment_id'), 'comments', ['comment_id'], unique=False)
     op.create_table('connection_type',
     sa.Column('ctype_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('ctype_description', sa.String(length=255), nullable=False),
@@ -119,7 +112,7 @@ def upgrade() -> None:
     sa.Column('division_id', sa.Integer(), nullable=False),
     sa.Column('division_name', sa.String(length=255), nullable=False),
     sa.Column('location_id', sa.Integer(), nullable=True),
-    sa.Column('added_by', sa.String(length=255), nullable=False),
+    sa.Column('added_by', sa.String(length=255), nullable=True),
     sa.Column('date_added', sa.Date(), nullable=True),
     sa.Column('devices_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['location_id'], ['location.location_id'], ),
@@ -132,7 +125,7 @@ def upgrade() -> None:
     sa.Column('brand', sa.String(length=255), nullable=False),
     sa.Column('model', sa.String(length=255), nullable=False),
     sa.Column('serial_number', sa.String(length=255), nullable=False),
-    sa.Column('inventory_number', sa.Integer(), nullable=True),
+    sa.Column('inventory_number', sa.String(length=255), nullable=True),
     sa.Column('delivery_date', sa.Date(), nullable=True),
     sa.Column('deployment_date', sa.Date(), nullable=True),
     sa.Column('status_id', sa.Integer(), nullable=True),
@@ -145,12 +138,22 @@ def upgrade() -> None:
     sa.Column('bos_date', sa.Date(), nullable=True),
     sa.Column('bos_by', sa.String(length=255), nullable=True),
     sa.Column('deployed_by', sa.String(length=255), nullable=True),
+    sa.Column('assigned_on', sa.Date(), nullable=True),
+    sa.Column('unassigned_on', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['division_id'], ['division.division_id'], ),
     sa.ForeignKeyConstraint(['status_id'], ['system_status.status_id'], ),
     sa.PrimaryKeyConstraint('devices_id'),
     sa.UniqueConstraint('model')
     )
     op.create_index(op.f('ix_devices_devices_id'), 'devices', ['devices_id'], unique=False)
+    op.create_table('comments',
+    sa.Column('comment_id', sa.Integer(), nullable=False),
+    sa.Column('devices_id', sa.Integer(), nullable=False),
+    sa.Column('comment_value', sa.Text(), nullable=True),
+    sa.ForeignKeyConstraint(['devices_id'], ['devices.devices_id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('comment_id')
+    )
+    op.create_index(op.f('ix_comments_comment_id'), 'comments', ['comment_id'], unique=False)
     op.create_table('conference_room_av_equipment',
     sa.Column('cr_equipment_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('name', sa.String(length=255), nullable=False),
@@ -231,6 +234,8 @@ def downgrade() -> None:
     op.drop_table('laptop')
     op.drop_index(op.f('ix_conference_room_av_equipment_cr_equipment_id'), table_name='conference_room_av_equipment')
     op.drop_table('conference_room_av_equipment')
+    op.drop_index(op.f('ix_comments_comment_id'), table_name='comments')
+    op.drop_table('comments')
     op.drop_index(op.f('ix_devices_devices_id'), table_name='devices')
     op.drop_table('devices')
     op.drop_index(op.f('ix_division_division_id'), table_name='division')
@@ -253,8 +258,6 @@ def downgrade() -> None:
     op.drop_table('cpu_type')
     op.drop_index(op.f('ix_connection_type_ctype_id'), table_name='connection_type')
     op.drop_table('connection_type')
-    op.drop_index(op.f('ix_comments_comment_id'), table_name='comments')
-    op.drop_table('comments')
     op.drop_index(op.f('ix_clients_client_id'), table_name='clients')
     op.drop_table('clients')
     # ### end Alembic commands ###
