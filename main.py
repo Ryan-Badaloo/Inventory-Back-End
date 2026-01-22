@@ -24,8 +24,8 @@ SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM')
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES'))
 ORGIN = os.getenv('ORGIN')
-USERNAME = os.getenv('Defualt_Username')
-PASSWORD = os.getenv('Defualt_Password')
+USERNAME = os.getenv('DEFAULT_USERNAME')
+PASSWORD = os.getenv('DEFAULT_PASSWORD')
 
 def get_db():
     db = SessionLocal()
@@ -40,6 +40,7 @@ db_dependency = Annotated[Session, Depends(get_db)]
 def defualt_user():
 
     db:Session = SessionLocal()
+    bcrypt_context = CryptContext(schemes=['bcrypt'])
 
     try:
 
@@ -52,7 +53,7 @@ def defualt_user():
                 firstname = "ICT",
                 lastname = "DEV",
                 email = USERNAME,
-                password = PASSWORD,
+                password = bcrypt_context.hash(PASSWORD),
                 role_id = 1,
                 active = True,
                 date_created = date.today(),

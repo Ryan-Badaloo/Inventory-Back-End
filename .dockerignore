@@ -3,4 +3,6 @@ venv
 dockerfile
 docker-compose.yml
 .dockerignore
-README
+.gitignore
+.env
+README.md
