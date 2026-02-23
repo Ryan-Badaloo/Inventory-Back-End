@@ -1042,6 +1042,31 @@ def get_printer_features_view(current_user: user_dependency, db: Session=Depends
 def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Divisions).all()
 
+@app.get('/get-divisions-location-parish/')
+def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db), location_name: Optional[str] = None, parish_name: Optional[str] = None):
+
+    divisions = (
+        db.query(Divisions)
+        .join(Locations, Divisions.location_id == Locations.location_id)
+        .join(Parishes, Locations.parish_id == Parishes.parish_id)
+    )
+
+    if parish_name:
+        divisions = divisions.filter(Parishes.parish_name == parish_name)
+
+    if location_name:
+        divisions = divisions.filter(Locations.location_name == location_name)
+
+    divisions = divisions.all()
+
+    if not divisions:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No divisions found"
+        )
+
+    return divisions
+
 
 
 @app.put('/assign-device/')

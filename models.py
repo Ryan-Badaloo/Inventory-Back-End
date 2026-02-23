@@ -60,7 +60,7 @@ class Devices(Base):
     deployment_date = Column(Date, nullable=True)
     status_id = Column(Integer, ForeignKey("system_status.status_id"), nullable=True)
     division_id = Column(Integer, ForeignKey("division.division_id"), nullable=True)
-    client_id = Column(Integer, nullable=True)
+    client_id = Column(Integer, ForeignKey("clients.client_id"), nullable=True)
     added_by = Column(String(255), nullable=True)
     last_updated_by = Column(String(255), nullable=True)
     repaired_date = Column(Date, nullable=True)
@@ -70,8 +70,8 @@ class Devices(Base):
     deployed_by = Column(String(255), nullable=True)
     assigned_on = Column(Date, nullable=True)
     unassigned_on = Column(Date, nullable=True)
-
-    comments = relationship("Comments", back_populates="device", cascade="all, delete-orphan", passive_deletes=True)
+    supplier_name = Column(String(255), nullable=True)
+    device_cost = Column(Integer, nullable=True)
 
 class SystemStatus(Base):
     __tablename__ = "system_status"
@@ -92,15 +92,6 @@ class ConnectionTypes(Base):
     ctype_description = Column(String(255), nullable=True)
 
 
-class Divisions(Base):
-    __tablename__ = "division"
-
-    division_id = Column(Integer, primary_key=True, index=True)
-    division_name = Column(String(255), nullable=True)
-    location_id = Column(Integer, ForeignKey("location.location_id"))
-    added_by = Column(String(255), nullable=True)
-    date_added = Column(Date, nullable=True)
-    devices_id = Column(Integer)
 
 class Comments(Base):
     __tablename__ = "comments"
@@ -109,30 +100,29 @@ class Comments(Base):
     devices_id = Column(Integer, ForeignKey(Devices.devices_id, ondelete="CASCADE"), nullable=False)
     comment_value = Column(Text)
 
-    device = relationship(Devices, back_populates="comments")
 
 
 class Laptops(Base):
     __tablename__ = "laptop"
 
     laptop_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    cpu_type_id = Column(Integer, nullable=False)
     hard_disk_capacity = Column(String(255), nullable=True)
     memory_capacity = Column(String(255), nullable=True)
-    processor_speed = Column(String(255), nullable=True)
-    processor_type = Column(String(255), nullable=True)
-    computer_name = Column(String(255), nullable=True)
-    mac_address = Column(String(255), nullable=True)
-    operating_system = Column(String(255), nullable=True)
-    microsoft_office_version = Column(String(255), nullable=True)
-    antivirus = Column(String(255), nullable=True)
-    pdf_reader = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     return_date = Column(Date, nullable=True)
-    devices_id = Column(Integer, ForeignKey("devices.devices_id"))
-
-    device = relationship("Devices", backref="laptop", uselist=False)
+    mac_address = Column(String(255), nullable=True)
+    manufactured_date = Column(Date, nullable=True)
+    memory_type = Column(String(255), nullable=True)
+    operating_system = Column(String(255), nullable=True)
+    cpu_type_id = Column(Integer, ForeignKey("cpu_type.cpu_type_id"), nullable=True)
+    processor_speed = Column(String(255), nullable=True)
+    processor_type = Column(String(255), nullable=True)
+    computer_name = Column(String(255), nullable=True)
+    microsoft_office_version = Column(String(255), nullable=True)
+    antivirus = Column(String(255), nullable=True)
+    pdf_reader = Column(String(255), nullable=True)
+    devices_id = Column(Integer, ForeignKey("devices.devices_id"), nullable=True)
 
 
 class Tablets(Base):
@@ -190,6 +180,15 @@ class CRAVEquipments(Base):
     devices_id = Column(Integer, ForeignKey("devices.devices_id"))
 
     device = relationship("Devices", backref="conference_room_av_equipment", uselist=False)
+
+class Divisions(Base):
+    __tablename__ = "division"
+
+    division_id = Column(Integer, primary_key=True, index=True)
+    division_name = Column(String(255), nullable=True)
+    location_id = Column(Integer, ForeignKey("location.location_id"))
+    added_by = Column(String(255), nullable=True)
+    date_added = Column(Date, nullable=True)
 
 class Locations(Base):
     __tablename__ = "location"
@@ -259,24 +258,30 @@ class DeviceRequest(BaseModel):
     inventory_number: str | None = None
     delivery_date: date | None = None
     deployment_date: date | None = None
+    bos_date: date | None = None
+    supplier_name: str | None = None
+    device_cost: int | None = None
     status_id: int | None = None
     division_id: int | None = None
+    comment: str | None = None
 
 class LaptopRequest(DeviceRequest):
-    cpu_type_id: int | None = None
     hard_disk_capacity: str | None = None
     memory_capacity: str | None = None
-    processor_speed: str | None = None
-    processor_type: str | None = None
-    computer_name: str | None = None
-    mac_address: str | None = None
-    operating_system: str | None = None
-    microsoft_office_version: str | None = None
-    antivirus: str | None = None
-    pdf_reader: str | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
     return_date: date | None = None
+    mac_address: str | None = None
+    manufactured_date: date | None = None
+    memory_type: str | None = None
+    operating_system: str | None = None
+    cpu_type_id: int | None = None
+    processor_speed: str | None = None
+    processor_type: str | None = None
+    computer_name: str | None = None
+    microsoft_office_version: str | None = None
+    antivirus: str | None = None
+    pdf_reader: str | None = None
 
 
 class TabletRequest(DeviceRequest):
