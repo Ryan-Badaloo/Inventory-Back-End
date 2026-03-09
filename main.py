@@ -286,122 +286,566 @@ def add_device_view(device: DeviceRequest, current_user: user_dependency, db: Se
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post('/add-laptop/', response_model=DeviceRequest)
+@app.post('/add-laptop/')
 def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Session=Depends(get_db)):
     try:
-        device_section = Devices(
-            category = laptop.category,
-            brand = laptop.brand,
-            model = laptop.model,
-            serial_number = laptop.serial_number,
-            inventory_number = laptop.inventory_number,
-            delivery_date = laptop.delivery_date,
-            deployment_date = laptop.deployment_date,
-            status_id = laptop.status_id,
-            division_id = laptop.division_id,
-            added_by = current_user.firstname + " " + current_user.lastname,
-        )
+        serialExists = db.query(Devices).filter(Devices.serial_number == laptop.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == laptop.inventory_number).first()
 
-        db.add(device_section)
-        db.flush()
 
-        laptop_section = Laptops(
-            
-            cpu_type_id = laptop.cpu_type_id,
-            hard_disk_capacity = laptop.hard_disk_capacity,
-            memory_capacity = laptop.memory_capacity,
-            processor_speed = laptop.processor_speed,
-            processor_type = laptop.processor_type,
-            computer_name = laptop.computer_name,
-            mac_address = laptop.mac_address,
-            operating_system = laptop.operating_system,
-            microsoft_office_version = laptop.microsoft_office_version,
-            antivirus = laptop.antivirus,
-            pdf_reader = laptop.pdf_reader,
-            warranty_start_date = laptop.warranty_start_date,
-            warranty_end_date = laptop.warranty_end_date,
-            return_date = laptop.return_date,
-            devices_id = device_section.devices_id,
-        )
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"        
+        else:
+            device_section = Devices(
+                category = laptop.category,
+                brand = laptop.brand,
+                model = laptop.model,
+                serial_number = laptop.serial_number,
+                inventory_number = laptop.inventory_number,
+                delivery_date = laptop.delivery_date,
+                deployment_date = laptop.deployment_date,
+                bos_date = laptop.bos_date,
+                supplier_name = laptop.supplier_name,
+                device_cost = laptop.device_cost,
+                status_id = laptop.status_id,
+                division_id = laptop.division_id,
+                location_id = laptop.location_id,
+                added_by = current_user.firstname + " " + current_user.lastname,
+            )
 
-        db.add(laptop_section)
-        db.commit()
-        db.refresh(laptop_section)
-        return {"message": "Laptop Has Been Added"}
+            db.add(device_section)
+            db.flush()
+
+            laptop_section = Laptops(
+                
+                
+                hard_disk_capacity = laptop.hard_disk_capacity,
+                memory_capacity = laptop.memory_capacity,
+                warranty_start_date = laptop.warranty_start_date,
+                warranty_end_date = laptop.warranty_end_date,
+                return_date = laptop.return_date,
+                mac_address = laptop.mac_address,
+                manufactured_date = laptop.manufactured_date,
+                memory_type = laptop.memory_type,
+                operating_system = laptop.operating_system,
+                cpu_type_id = laptop.cpu_type_id,
+                processor_speed = laptop.processor_speed,
+                processor_type = laptop.processor_type,
+                computer_name = laptop.computer_name,
+                microsoft_office_version = laptop.microsoft_office_version,
+                antivirus = laptop.antivirus,
+                pdf_reader = laptop.pdf_reader,
+                
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(laptop_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = laptop.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(laptop_section)
+            return {"message": "Laptop Has Been Added"}
+        
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-    
+@app.post('/add-desktop/')
+def add_desktop_view(desktop: DesktopRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        serialExists = db.query(Devices).filter(Devices.serial_number == desktop.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == desktop.inventory_number).first()
 
-@app.post('/add-tablet/', response_model=DeviceRequest)
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"        
+        else:
+            device_section = Devices(
+                category = desktop.category,
+                brand = desktop.brand,
+                model = desktop.model,
+                serial_number = desktop.serial_number,
+                inventory_number = desktop.inventory_number,
+                delivery_date = desktop.delivery_date,
+                deployment_date = desktop.deployment_date,
+                bos_date = desktop.bos_date,
+                supplier_name = desktop.supplier_name,
+                device_cost = desktop.device_cost,
+                status_id = desktop.status_id,
+                division_id = desktop.division_id,
+                location_id = desktop.location_id,
+                added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            desktop_section = Desktops(
+                
+                
+                hard_disk_capacity = desktop.hard_disk_capacity,
+                memory_capacity = desktop.memory_capacity,
+                warranty_start_date = desktop.warranty_start_date,
+                warranty_end_date = desktop.warranty_end_date,
+                return_date = desktop.return_date,
+                mac_address = desktop.mac_address,
+                manufactured_date = desktop.manufactured_date,
+                memory_type = desktop.memory_type,
+                operating_system = desktop.operating_system,
+                cpu_type_id = desktop.cpu_type_id,
+                processor_speed = desktop.processor_speed,
+                processor_type = desktop.processor_type,
+                computer_name = desktop.computer_name,
+                microsoft_office_version = desktop.microsoft_office_version,
+                antivirus = desktop.antivirus,
+                form_factor_id = desktop.form_factor_id,
+                pdf_reader = desktop.pdf_reader,
+                
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(desktop_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = desktop.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(desktop_section)
+            return {"message": "Desktop Has Been Added"}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post('/add-server/')
+def add_server_view(server: ServerRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+        serialExists = db.query(Devices).filter(Devices.serial_number == server.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == server.inventory_number).first()
+
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"        
+        else:
+            device_section = Devices(
+                category = server.category,
+                brand = server.brand,
+                model = server.model,
+                serial_number = server.serial_number,
+                inventory_number = server.inventory_number,
+                delivery_date = server.delivery_date,
+                deployment_date = server.deployment_date,
+                bos_date = server.bos_date,
+                supplier_name = server.supplier_name,
+                device_cost = server.device_cost,
+                status_id = server.status_id,
+                division_id = server.division_id,
+                location_id = server.location_id,
+                added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            server_section = Servers(
+                
+                
+                hard_disk_capacity = server.hard_disk_capacity,
+                memory_capacity = server.memory_capacity,
+                warranty_start_date = server.warranty_start_date,
+                warranty_end_date = server.warranty_end_date,
+                return_date = server.return_date,
+                mac_address = server.mac_address,
+                manufactured_date = server.manufactured_date,
+                memory_type = server.memory_type,
+                operating_system = server.operating_system,
+                cpu_type_id = server.cpu_type_id,
+                processor_speed = server.processor_speed,
+                processor_type = server.processor_type,
+                computer_name = server.computer_name,
+                microsoft_office_version = server.microsoft_office_version,
+                antivirus = server.antivirus,
+                form_factor_id = server.form_factor_id,
+                raid_type_id = server.raid_type_id,
+                number_of_hard_drives = server.number_of_hard_drives,
+                number_of_power_supplies = server.number_of_power_supplies,
+                pdf_reader = server.pdf_reader,
+                
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(server_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = server.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(server_section)
+            return {"message": "Server Has Been Added"}
+        
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post('/add-tablet/')
 def add_tablet_view(tablet: TabletRequest, current_user: user_dependency, db: Session=Depends(get_db)):
     try:
-        device_section = Devices(
-            category = tablet.category,
-            brand = tablet.brand,
-            model = tablet.model,
-            serial_number = tablet.serial_number,
-            inventory_number = tablet.inventory_number,
-            delivery_date = tablet.delivery_date,
-            deployment_date = tablet.deployment_date,
-            status_id = tablet.status_id,
-            division_id = tablet.division_id,
-            added_by = current_user.firstname + " " + current_user.lastname,
-        )
 
-        db.add(device_section)
-        db.flush()
+        serialExists = db.query(Devices).filter(Devices.serial_number == tablet.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == tablet.inventory_number).first()
 
-        tablet_section = Tablets(
-            
-            imei_number = tablet.imei_number,
-            operating_system = tablet.operating_system,
-            version = tablet.version,
-            hard_disk_capacity = tablet.hard_disk_capacity,
-            memory_capacity = tablet.memory_capacity,
-            warranty_start_date = tablet.warranty_start_date,
-            warranty_end_date = tablet.warranty_end_date,
-            return_date = tablet.return_date,
-            devices_id = device_section.devices_id,
-        )
 
-        db.add(tablet_section)
-        db.commit()
-        db.refresh(tablet_section)
-        return {"message": "Tablet Has Been Added"}
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = tablet.category,
+                    brand = tablet.brand,
+                    model = tablet.model,
+                    serial_number = tablet.serial_number,
+                    inventory_number = tablet.inventory_number,
+                    delivery_date = tablet.delivery_date,
+                    deployment_date = tablet.deployment_date,
+                    bos_date = tablet.bos_date,
+                    supplier_name = tablet.supplier_name,
+                    device_cost = tablet.device_cost,
+                    status_id = tablet.status_id,
+                    division_id = tablet.division_id,
+                    location_id = tablet.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            tablet_section = Tablets(
+                
+                hard_disk_capacity = tablet.hard_disk_capacity,
+                memory_capacity = tablet.memory_capacity,
+                warranty_start_date = tablet.warranty_start_date,
+                warranty_end_date = tablet.warranty_end_date,
+                return_date = tablet.return_date,
+                device_size = tablet.device_size,
+                operating_system = tablet.operating_system,
+                imei_number = tablet.imei_number,
+                version = tablet.version,
+
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(tablet_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = tablet.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(tablet_section)
+            return {"message": "Tablet Has Been Added"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
-@app.post('/add-mouse-keyboard/', response_model=DeviceRequest)
+@app.post('/add-mouse-keyboard/')
 def add_mouse_keyboard_view(mouse_keyboard: MouseKeyboardRequest, current_user: user_dependency, db: Session=Depends(get_db)):
     try:
-        device_section = Devices(
-            category = mouse_keyboard.category,
-            brand = mouse_keyboard.brand,
-            model = mouse_keyboard.model,
-            serial_number = mouse_keyboard.serial_number,
-            inventory_number = mouse_keyboard.inventory_number,
-            delivery_date = mouse_keyboard.delivery_date,
-            deployment_date = mouse_keyboard.deployment_date,
-            status_id = mouse_keyboard.status_id,
-            division_id = mouse_keyboard.division_id,
-            added_by = current_user.firstname + " " + current_user.lastname,
-        )
 
-        db.add(device_section)
-        db.flush()
+        serialExists = db.query(Devices).filter(Devices.serial_number == mouse_keyboard.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == mouse_keyboard.inventory_number).first()
 
-        mouse_keyboard_section = MouseKeyboards(
-            connection_type_id = mouse_keyboard.connection_type_id,
-            devices_id = device_section.devices_id,
-        )
 
-        db.add(mouse_keyboard_section)
-        db.commit()
-        db.refresh(mouse_keyboard_section)
-        return {"message": "Mouse/Keyboard Has Been Added"}
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = mouse_keyboard.category,
+                    brand = mouse_keyboard.brand,
+                    model = mouse_keyboard.model,
+                    serial_number = mouse_keyboard.serial_number,
+                    inventory_number = mouse_keyboard.inventory_number,
+                    delivery_date = mouse_keyboard.delivery_date,
+                    deployment_date = mouse_keyboard.deployment_date,
+                    bos_date = mouse_keyboard.bos_date,
+                    supplier_name = mouse_keyboard.supplier_name,
+                    device_cost = mouse_keyboard.device_cost,
+                    status_id = mouse_keyboard.status_id,
+                    division_id = mouse_keyboard.division_id,
+                    location_id = mouse_keyboard.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            mouse_keyboard_section = MouseKeyboards(
+                connection_type_id = mouse_keyboard.connection_type_id,
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(mouse_keyboard_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = mouse_keyboard.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(mouse_keyboard_section)
+            return {"message": "Mouse/Keyboard Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post('/add-scanner/')
+def add_scanner_view(scanner: ScannerRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+
+        serialExists = db.query(Devices).filter(Devices.serial_number == scanner.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == scanner.inventory_number).first()
+
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = scanner.category,
+                    brand = scanner.brand,
+                    model = scanner.model,
+                    serial_number = scanner.serial_number,
+                    inventory_number = scanner.inventory_number,
+                    delivery_date = scanner.delivery_date,
+                    deployment_date = scanner.deployment_date,
+                    bos_date = scanner.bos_date,
+                    supplier_name = scanner.supplier_name,
+                    device_cost = scanner.device_cost,
+                    status_id = scanner.status_id,
+                    division_id = scanner.division_id,
+                    location_id = scanner.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            scanner_section = Scanners(
+                mac_address = scanner.mac_address,
+                ip_address = scanner.ip_address,
+                connection_type_id = scanner.connection_type_id,
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(scanner_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = scanner.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(scanner_section)
+            return {"message": "Scanner Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post('/add-surge-protector/')
+def add_surge_protector_view(surge_protector: SurgeProtectorRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+
+        serialExists = db.query(Devices).filter(Devices.serial_number == surge_protector.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == surge_protector.inventory_number).first()
+
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = surge_protector.category,
+                    brand = surge_protector.brand,
+                    model = surge_protector.model,
+                    serial_number = surge_protector.serial_number,
+                    inventory_number = surge_protector.inventory_number,
+                    delivery_date = surge_protector.delivery_date,
+                    deployment_date = surge_protector.deployment_date,
+                    bos_date = surge_protector.bos_date,
+                    supplier_name = surge_protector.supplier_name,
+                    device_cost = surge_protector.device_cost,
+                    status_id = surge_protector.status_id,
+                    division_id = surge_protector.division_id,
+                    location_id = surge_protector.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            surge_protector_section = SurgeProtectors(
+                
+                number_of_outlets = surge_protector.number_of_outlets,
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(surge_protector_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = surge_protector.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(surge_protector_section)
+            return {"message": "Surge Protector Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+
+@app.post('/add-ups/')
+def add_ups_view(ups: UPSRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+
+        serialExists = db.query(Devices).filter(Devices.serial_number == ups.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == ups.inventory_number).first()
+
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = ups.category,
+                    brand = ups.brand,
+                    model = ups.model,
+                    serial_number = ups.serial_number,
+                    inventory_number = ups.inventory_number,
+                    delivery_date = ups.delivery_date,
+                    deployment_date = ups.deployment_date,
+                    bos_date = ups.bos_date,
+                    supplier_name = ups.supplier_name,
+                    device_cost = ups.device_cost,
+                    status_id = ups.status_id,
+                    division_id = ups.division_id,
+                    location_id = ups.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            ups_section = UPS(
+                
+                number_of_outlets = ups.number_of_outlets,
+                return_date = ups.return_date,
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(ups_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = ups.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(ups_section)
+            return {"message": "UPS Has Been Added"}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(e))
+    
+@app.post('/add-speaker/')
+def add_speaker_view(speaker: SpeakerRequest, current_user: user_dependency, db: Session=Depends(get_db)):
+    try:
+
+        serialExists = db.query(Devices).filter(Devices.serial_number == speaker.serial_number).first()
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == speaker.inventory_number).first()
+
+
+        if serialExists:
+            return "Serial Found"
+        elif inventoryExists:
+            return "Inventory Found"  
+        else:
+            device_section = Devices(
+                    category = speaker.category,
+                    brand = speaker.brand,
+                    model = speaker.model,
+                    serial_number = speaker.serial_number,
+                    inventory_number = speaker.inventory_number,
+                    delivery_date = speaker.delivery_date,
+                    deployment_date = speaker.deployment_date,
+                    bos_date = speaker.bos_date,
+                    supplier_name = speaker.supplier_name,
+                    device_cost = speaker.device_cost,
+                    status_id = speaker.status_id,
+                    division_id = speaker.division_id,
+                    location_id = speaker.location_id,
+                    added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(device_section)
+            db.flush()
+
+            speaker_section = Speakers(
+
+                return_date = speaker.return_date,
+                speaker_type_id = speaker.speaker_type_id,
+                number_of_speakers = speaker.number_of_speakers,
+                
+                devices_id = device_section.devices_id,
+            )
+
+            db.add(speaker_section)
+
+            comment_section = Comments(
+                devices_id = device_section.devices_id,
+                comment_value = speaker.comment,
+            )
+
+            db.add(comment_section)
+
+            db.commit()
+            db.refresh(speaker_section)
+            return {"message": "Speaker Has Been Added"}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
@@ -1038,35 +1482,107 @@ def get_connection_types_view(current_user: user_dependency, db: Session=Depends
 def get_printer_features_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(PrinterFeatures).all()
 
+@app.get('/get-form-factors/')
+def get_form_factors_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(FormFactors).all()
+
+@app.get('/get-raid-types/')
+def get_raid_types_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(RaidTypes).all()
+
+@app.get('/get-speaker-types/')
+def get_speaker_types_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(SpeakerTypes).all()
+
 @app.get('/get-divisions/')
 def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Divisions).all()
 
-@app.get('/get-divisions-location-parish/')
-def get_divisions_view(current_user: user_dependency, db: Session=Depends(get_db), location_name: Optional[str] = None, parish_name: Optional[str] = None):
+@app.get('/get-locations/')
+def get_locations_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Locations).all()
 
-    divisions = (
-        db.query(Divisions)
-        .join(Locations, Divisions.location_id == Locations.location_id)
-        .join(Parishes, Locations.parish_id == Parishes.parish_id)
-    )
+@app.get('/get-parishes/')
+def get_parishes_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Parishes).all()
 
-    if parish_name:
-        divisions = divisions.filter(Parishes.parish_name == parish_name)
+@app.get('/get-location-types/')
+def get_location_types_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(LocationTypes).all()
 
-    if location_name:
-        divisions = divisions.filter(Locations.location_name == location_name)
+@app.get('/get-parish-locations/')
+def get_parish_locations_view(current_user: user_dependency, db: Session=Depends(get_db), parish_id: Optional[int] = None):
 
-    divisions = divisions.all()
+    if parish_id:
+        locations = (
+            db.query(Locations)
+            .join(Parishes, Parishes.parish_id == Locations.parish_id)
+            .filter(Parishes.parish_id == parish_id)
+            .all()
+        )
+    else:
+        locations = (
+            db.query(Locations).all()
+        )
 
-    if not divisions:
-        raise HTTPException(
-            status_code=404,
-            detail=f"No divisions found"
+    return locations
+
+@app.get('/get-parish-divisions/')
+def get_parish_divisions_view(current_user: user_dependency, db: Session=Depends(get_db), parish_id: Optional[int] = None):
+
+    if parish_id:
+        divisions = (
+            db.query(Divisions)
+            .join(DivisionLocation, DivisionLocation.division_id == Divisions.division_id)
+            .join(Locations, Locations.location_id == DivisionLocation.location_id)
+            .join(Parishes, Parishes.parish_id == Locations.parish_id)
+            .filter(Parishes.parish_id == parish_id)
+            .all()
+        )
+    
+    else:
+        divisions = (
+            db.query(Divisions).all()
         )
 
     return divisions
 
+
+@app.get('/get-location-parish/')
+def get_location_parish_view(current_user: user_dependency, db: Session=Depends(get_db), location_id: Optional[int] = None):
+
+    if location_id:
+        parish = (
+            db.query(Parishes)
+            .join(Locations, Parishes.parish_id == Locations.parish_id)
+            .filter(Locations.location_id == location_id)
+            .all()
+        )
+    else:
+        parish = (
+            db.query(Parishes).all()
+        )
+
+    return parish
+
+
+@app.get('/get-location-division/')
+def get_location_parish_view(current_user: user_dependency, db: Session=Depends(get_db), location_id: Optional[int] = None):
+    
+    if location_id:
+        divisions = (
+            db.query(Divisions)
+            .join(DivisionLocation, DivisionLocation.division_id == Divisions.division_id)
+            .join(Locations, Locations.location_id == DivisionLocation.location_id)
+            .filter(Locations.location_id == location_id)
+            .all()
+        )
+    else:
+        divisions = (
+            db.query(Divisions).all()
+        )
+    
+    return divisions
 
 
 @app.put('/assign-device/')
