@@ -12,7 +12,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from fastapi import Depends, FastAPI, HTTPException, status, APIRouter, UploadFile, File
+from fastapi import Depends, FastAPI, HTTPException, status, APIRouter, UploadFile, File, Query
 from datetime import datetime, timedelta, timezone, date
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -277,6 +277,7 @@ def add_device_view(device: DeviceRequest, current_user: user_dependency, db: Se
             inventory_number = device.inventory_number,
             delivery_date = device.delivery_date,
             deployment_date = device.deployment_date,
+            return_date = device.return_date,
             status_id = device.status_id,
             division_id = device.division_id,
             added_by = current_user.firstname + " " + current_user.lastname,
@@ -311,6 +312,7 @@ def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Se
                 delivery_date = laptop.delivery_date,
                 deployment_date = laptop.deployment_date,
                 bos_date = laptop.bos_date,
+                return_date = laptop.return_date,
                 supplier_name = laptop.supplier_name,
                 device_cost = laptop.device_cost,
                 status_id = laptop.status_id,
@@ -335,7 +337,6 @@ def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Se
                 memory_capacity = laptop.memory_capacity,
                 warranty_start_date = laptop.warranty_start_date,
                 warranty_end_date = laptop.warranty_end_date,
-                return_date = laptop.return_date,
                 mac_address = laptop.mac_address,
                 manufactured_date = laptop.manufactured_date,
                 memory_type = laptop.memory_type,
@@ -405,6 +406,7 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
             delivery_date=desktop.delivery_date,
             deployment_date=desktop.deployment_date,
             bos_date=desktop.bos_date,
+            return_date=desktop.return_date,
 
             supplier_name=desktop.supplier_name,
             device_cost=desktop.device_cost,
@@ -432,8 +434,6 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
 
             warranty_start_date=desktop.warranty_start_date,
             warranty_end_date=desktop.warranty_end_date,
-
-            return_date=desktop.return_date,
 
             mac_address=desktop.mac_address,
             manufactured_date=desktop.manufactured_date,
@@ -521,6 +521,7 @@ def add_server_view(server: ServerRequest, current_user: user_dependency, db: Se
                 delivery_date = server.delivery_date,
                 deployment_date = server.deployment_date,
                 bos_date = server.bos_date,
+                return_date = server.return_date,
                 supplier_name = server.supplier_name,
                 device_cost = server.device_cost,
                 status_id = server.status_id,
@@ -542,7 +543,6 @@ def add_server_view(server: ServerRequest, current_user: user_dependency, db: Se
                 memory_capacity = server.memory_capacity,
                 warranty_start_date = server.warranty_start_date,
                 warranty_end_date = server.warranty_end_date,
-                return_date = server.return_date,
                 mac_address = server.mac_address,
                 manufactured_date = server.manufactured_date,
                 memory_type = server.memory_type,
@@ -601,6 +601,7 @@ def add_tablet_view(data: AddTabletRequest, current_user: user_dependency, db: S
                     delivery_date = data.tablet.delivery_date,
                     deployment_date = data.tablet.deployment_date,
                     bos_date = data.tablet.bos_date,
+                    return_date = data.tablet.return_date,
                     supplier_name = data.tablet.supplier_name,
                     device_cost = data.tablet.device_cost,
                     status_id = data.tablet.status_id,
@@ -621,7 +622,6 @@ def add_tablet_view(data: AddTabletRequest, current_user: user_dependency, db: S
                 memory_capacity = data.tablet.memory_capacity,
                 warranty_start_date = data.tablet.warranty_start_date,
                 warranty_end_date = data.tablet.warranty_end_date,
-                return_date = data.tablet.return_date,
                 device_size = data.tablet.device_size,
                 operating_system = data.tablet.operating_system,
                 imei_number = data.tablet.imei_number,
@@ -875,6 +875,7 @@ def add_ups_view(ups: UPSRequest, current_user: user_dependency, db: Session=Dep
                     delivery_date = ups.delivery_date,
                     deployment_date = ups.deployment_date,
                     bos_date = ups.bos_date,
+                    return_date = ups.return_date,
                     supplier_name = ups.supplier_name,
                     device_cost = ups.device_cost,
                     status_id = ups.status_id,
@@ -892,7 +893,6 @@ def add_ups_view(ups: UPSRequest, current_user: user_dependency, db: Session=Dep
             ups_section = UPS(
                 
                 number_of_outlets = ups.number_of_outlets,
-                return_date = ups.return_date,
                 devices_id = device_section.devices_id,
             )
 
@@ -934,6 +934,7 @@ def add_speaker_view(speaker: SpeakerRequest, current_user: user_dependency, db:
                     delivery_date = speaker.delivery_date,
                     deployment_date = speaker.deployment_date,
                     bos_date = speaker.bos_date,
+                    return_date = speaker.return_date,
                     supplier_name = speaker.supplier_name,
                     device_cost = speaker.device_cost,
                     status_id = speaker.status_id,
@@ -950,7 +951,6 @@ def add_speaker_view(speaker: SpeakerRequest, current_user: user_dependency, db:
 
             speaker_section = Speakers(
 
-                return_date = speaker.return_date,
                 speaker_type_id = speaker.speaker_type_id,
                 number_of_speakers = speaker.number_of_speakers,
                 
@@ -1092,6 +1092,7 @@ def add_printer_view(printer: PrinterRequest, current_user: user_dependency, db:
             delivery_date = printer.delivery_date,
             deployment_date = printer.deployment_date,
             bos_date = printer.bos_date,
+            return_date = printer.return_date,
             supplier_name = printer.supplier_name,
             device_cost = printer.device_cost,
             status_id = printer.status_id,
@@ -1107,7 +1108,6 @@ def add_printer_view(printer: PrinterRequest, current_user: user_dependency, db:
         db.flush()
 
         printer_section = Printers(
-            return_date = printer.return_date,
             ip_address = printer.ip_address,
             feature_id = printer.feature_id,
             connection_type_id = printer.connection_type_id,
@@ -1261,6 +1261,7 @@ def add_network_switch_view(network_switch: NetworkSwitchRequest, current_user: 
                 delivery_date = network_switch.delivery_date,
                 deployment_date = network_switch.deployment_date,
                 bos_date = network_switch.bos_date,
+                return_date = network_switch.return_date,
                 supplier_name = network_switch.supplier_name,
                 device_cost = network_switch.device_cost,
                 status_id = network_switch.status_id,
@@ -1278,7 +1279,6 @@ def add_network_switch_view(network_switch: NetworkSwitchRequest, current_user: 
             network_switch_section = NetworkSwitches(
                 warranty_start_date = network_switch.warranty_start_date,
                 warranty_end_date = network_switch.warranty_end_date,
-                return_date = network_switch.return_date,
                 mac_address = network_switch.mac_address,
                 number_of_ports = network_switch.number_of_ports,
                 device_size = network_switch.device_size,
@@ -1328,6 +1328,7 @@ def add_monitor_view(monitor: MonitorRequest, current_user: user_dependency, db:
                 delivery_date = monitor.delivery_date,
                 deployment_date = monitor.deployment_date,
                 bos_date = monitor.bos_date,
+                return_date = monitor.return_date,
                 supplier_name = monitor.supplier_name,
                 device_cost = monitor.device_cost,
                 status_id = monitor.status_id,
@@ -1345,7 +1346,6 @@ def add_monitor_view(monitor: MonitorRequest, current_user: user_dependency, db:
             monitor_section = Monitors(
                 warranty_start_date = monitor.warranty_start_date,
                 warranty_end_date = monitor.warranty_end_date,
-                return_date = monitor.return_date,
                 manufactured_date = monitor.manufactured_date,
                 monitor_size = monitor.monitor_size,
                 monitor_type_id = monitor.monitor_type_id,
@@ -1846,16 +1846,22 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 CPUTypes,
                 Laptops
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Laptops, Devices.devices_id == Laptops.devices_id)
             .outerjoin(CPUTypes, Laptops.cpu_type_id == CPUTypes.cpu_type_id)
             .filter(Devices.serial_number == serial_number)
@@ -1868,17 +1874,23 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 CPUTypes,
                 FormFactors,
                 Desktops
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)            
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Desktops, Devices.devices_id == Desktops.devices_id)
             .outerjoin(CPUTypes, Desktops.cpu_type_id == CPUTypes.cpu_type_id)
             .outerjoin(FormFactors, Desktops.form_factor_id == FormFactors.form_factor_id)
@@ -1892,18 +1904,24 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 CPUTypes,
                 FormFactors,
                 RaidTypes,
                 Servers
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Servers, Devices.devices_id == Servers.devices_id)
             .outerjoin(CPUTypes, Servers.cpu_type_id == CPUTypes.cpu_type_id)
             .outerjoin(FormFactors, Servers.form_factor_id == FormFactors.form_factor_id)
@@ -1917,9 +1935,12 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 Tablets,
                 Bags,
                 Adapters,
@@ -1927,9 +1948,12 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 BagFabricTypes,
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)             
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Tablets, Devices.devices_id == Tablets.devices_id)
             .outerjoin(Bags, Devices.devices_id == Bags.devices_id)
             .outerjoin(Adapters, Devices.devices_id == Adapters.devices_id)
@@ -1945,16 +1969,22 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 ConnectionTypes,
                 MouseKeyboards
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(MouseKeyboards, Devices.devices_id == MouseKeyboards.devices_id)
             .outerjoin(ConnectionTypes, MouseKeyboards.connection_type_id == ConnectionTypes.ctype_id)
             .filter(Devices.serial_number == serial_number)
@@ -1966,16 +1996,22 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 ConnectionTypes,
                 Scanners
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Scanners, Devices.devices_id == Scanners.devices_id)
             .outerjoin(ConnectionTypes, Scanners.connection_type_id == ConnectionTypes.ctype_id)
             .filter(Devices.serial_number == serial_number)
@@ -1987,15 +2023,21 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 SurgeProtectors
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(SurgeProtectors, Devices.devices_id == SurgeProtectors.devices_id)
             .filter(Devices.serial_number == serial_number)
             .first()
@@ -2006,15 +2048,21 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 UPS
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(UPS, Devices.devices_id == UPS.devices_id)
             .filter(Devices.serial_number == serial_number)
             .first()
@@ -2025,16 +2073,22 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 SpeakerTypes,
                 Speakers
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Speakers, Devices.devices_id == Speakers.devices_id)
             .outerjoin(SpeakerTypes, Speakers.speaker_type_id == SpeakerTypes.speaker_type_id)
             .filter(Devices.serial_number == serial_number)
@@ -2046,14 +2100,20 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .filter(Devices.serial_number == serial_number)
             .first()
         )
@@ -2063,15 +2123,21 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 OtherEquipments
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(OtherEquipments, Devices.devices_id == OtherEquipments.devices_id)
             .filter(Devices.serial_number == serial_number)
             .first()
@@ -2082,17 +2148,23 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 ConnectionTypes,
                 PrinterFeatures,
                 Printers
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Printers, Devices.devices_id == Printers.devices_id)
             .outerjoin(ConnectionTypes, Printers.connection_type_id == ConnectionTypes.ctype_id)
             .outerjoin(PrinterFeatures, Printers.feature_id == PrinterFeatures.feature_id)
@@ -2105,14 +2177,20 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .filter(Devices.serial_number == serial_number)
             .first()
         )
@@ -2122,17 +2200,23 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 MeetingRooms,
                 CRAVEquipmentTypes,
                 CRAVEquipments
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(CRAVEquipments, Devices.devices_id == CRAVEquipments.devices_id)
             .outerjoin(MeetingRooms, CRAVEquipments.meeting_room_id == MeetingRooms.meeting_room_id)
             .outerjoin(CRAVEquipmentTypes, CRAVEquipments.crav_equipment_type_id == CRAVEquipmentTypes.crav_equipment_type_id)
@@ -2145,15 +2229,21 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 NetworkSwitches
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(NetworkSwitches, Devices.devices_id == NetworkSwitches.devices_id)
             .filter(Devices.serial_number == serial_number)
             .first()
@@ -2164,17 +2254,23 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations,
                 MonitorTypes,
                 MonitorFunctions,
                 Monitors
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .outerjoin(Monitors, Devices.devices_id == Monitors.devices_id)
             .outerjoin(MonitorTypes, Monitors.monitor_type_id == MonitorTypes.monitor_type_id)
             .outerjoin(MonitorFunctions, Monitors.monitor_function_id == MonitorFunctions.monitor_function_id)
@@ -2187,63 +2283,69 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             db.query(
                 Devices,
                 SystemStatus.status_description,
+                Parishes.parish_name,
+                LocationTypes.ltype_name,
+                Locations.location_name,
                 Divisions.division_name,
+                Branches.branch_name,
                 Clients,
-                Locations
             )
             .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
             .outerjoin(Locations, Devices.location_id == Locations.location_id)
+            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
+            .outerjoin(Clients, Devices.client_id == Clients.client_id)
             .filter(Devices.serial_number == serial_number)
             .first()
         )
 
     if result:
         if (category == "Laptop"):
-            device, status_description, division_name, client, location, cpu_type, laptop = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, laptop = result
 
         elif (category == "Desktop"):
-            device, status_description, division_name, client, location, cpu_type, form_factor, desktop = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, form_factor, desktop = result
 
         elif (category == "Server"):
-            device, status_description, division_name, client, location, cpu_type, form_factor, raid_type, server = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, form_factor, raid_type, server = result
 
         elif category == "Tablet":
-            device, status_description, division_name, client, location, tablet, bag, adapter, bag_type, bag_fabric_type = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, tablet, bag, adapter, bag_type, bag_fabric_type = result
 
         elif (category == "Mouse") or (category == "Keyboard"):
-            device, status_description, division_name, client, location, connection_type, mouse_keyboard = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, mouse_keyboard = result
 
         elif (category == "Scanner"):
-            device, status_description, division_name, client, location, connection_type, scanner = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, scanner = result
         
         elif (category == "Surge Protector"):
-            device, status_description, division_name, client, location, surge_protector = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, surge_protector = result
 
         elif (category == "UPS"):
-            device, status_description, division_name, client, location, ups = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, ups = result
 
         elif (category == "Speaker"):
-            device, status_description, division_name, client, location, speaker_type, speaker = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, speaker_type, speaker = result
 
         elif (category == "Other Equipment"):
-            device, status_description, division_name, client, location, other_equipment = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, other_equipment = result
 
         elif category == "Printer":
-            device, status_description, division_name, client, location, connection_type, printer_feature, printer = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, printer_feature, printer = result
 
         elif category == "CRAV":
-            device, status_description, division_name, client, location, meeting_room, equipment_type, crav = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, meeting_room, equipment_type, crav = result
 
         elif category == "Network Switch":
-            device, status_description, division_name, client, location, network_switch = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, network_switch = result
 
         elif category == "Monitor":
-            device, status_description, division_name, client, location, monitor_types, monitor_functions, monitor = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, monitor_types, monitor_functions, monitor = result
 
         else:
-            device, status_description, division_name, client, location = result
+            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, location = result
 
         device_item = {
             "devices_id": device.devices_id,
@@ -2255,9 +2357,17 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             "delivery_date": device.delivery_date,
             "deployment_date": device.deployment_date,
             "status_id": device.status_id,
+            "parish_id": device.parish_id,
+            "ltype_id": device.ltype_id,
+            "location_id": device.location_id,
             "division_id": device.division_id,
+            "branch_id": device.branch_id,
             "status_description": status_description if status_description else None,
+            "parish_name": parish_name if parish_name else None,
+            "ltype_name": ltype_name if ltype_name else None,
+            "location_name": location_name if location_name else None,
             "division_name": division_name if division_name else None,
+            "branch_name": branch_name if branch_name else None,
             "client_name": client.firstname + " " + client.lastname if client else None,
             "added_by": device.added_by,
             "last_updated_by": device.last_updated_by,
@@ -2265,6 +2375,7 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             "bos_date": device.bos_date,
             "bos_by": device.bos_by,
             "deployed_by": device.deployed_by,
+            "return_date": device.return_date,
             "assigned_on": device.assigned_on,
             "unassigned_on": device.unassigned_on,
             "supplier_name": device.supplier_name,
@@ -2285,7 +2396,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "pdf_reader": laptop.pdf_reader,
                 "warranty_start_date": laptop.warranty_start_date,
                 "warranty_end_date": laptop.warranty_end_date,
-                "return_date": laptop.return_date,
                 "manufactured_date": laptop.manufactured_date,
                 "memory_type": laptop.memory_type,
                 "cpu_type": cpu_type.cpu_type_description if cpu_type else None,
@@ -2306,7 +2416,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "pdf_reader": desktop.pdf_reader,
                 "warranty_start_date": desktop.warranty_start_date,
                 "warranty_end_date": desktop.warranty_end_date,
-                "return_date": desktop.return_date,
                 "manufactured_date": desktop.manufactured_date,
                 "memory_type": desktop.memory_type,
                 "cpu_type": cpu_type.cpu_type_description if cpu_type else None,
@@ -2327,7 +2436,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "pdf_reader": server.pdf_reader,
                 "warranty_start_date": server.warranty_start_date,
                 "warranty_end_date": server.warranty_end_date,
-                "return_date": server.return_date,
                 "manufactured_date": server.manufactured_date,
                 "memory_type": server.memory_type,
                 "cpu_type": cpu_type.cpu_type_description if cpu_type else None,
@@ -2342,7 +2450,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "operating_system": tablet.operating_system,
                 "warranty_start_date": tablet.warranty_start_date,
                 "warranty_end_date": tablet.warranty_end_date,
-                "return_date": tablet.return_date,
                 "imei_number": tablet.imei_number,
                 "version": tablet.version,
                 "device_size": tablet.device_size,
@@ -2380,12 +2487,10 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
         elif (category == "UPS"):
             device_item.update({
                 "number_of_outlets": ups.number_of_outlets,
-                "return_date": ups.return_date
             })
 
         elif (category == "Speaker"):
             device_item.update({
-                "return_date": speaker.return_date,
                 "number_of_speakers": speaker.number_of_speakers,
                 "speaker_type": speaker_type.speaker_type_description
             })
@@ -2400,7 +2505,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "ip_address": printer.ip_address,
                 "feature": printer_feature.feature_description,
                 "connection_type": connection_type.ctype_description,
-                "return_date": printer.return_date
             })
 
         elif (category == "CRAV"):
@@ -2416,7 +2520,6 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             device_item.update({
                 "warranty_start_date": network_switch.warranty_start_date,
                 "warranty_end_date": network_switch.warranty_end_date,
-                "return_date": network_switch.return_date,
                 "mac_address": network_switch.mac_address,
                 "device_size": network_switch.device_size,
                 "firmware_type": network_switch.firmware_type,
@@ -2429,9 +2532,7 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
         elif (category == "Monitor"):
             device_item.update({
                 "warranty_start_date": monitor.warranty_start_date,
-                "warranty_end_date": monitor.warranty_end_date,
-                "return_date": monitor.return_date,
-                
+                "warranty_end_date": monitor.warranty_end_date,                
                 "manufactured_date": monitor.manufactured_date,
                 "monitor_size": monitor.monitor_size,
                 "monitor_type": monitor_types.monitor_type_description,
@@ -2742,9 +2843,21 @@ def get_location_parish_view(current_user: user_dependency, db: Session=Depends(
 def get_comments_view(current_user: user_dependency, devices_id: int, db: Session=Depends(get_db)):
     return db.query(Comments).filter(Comments.devices_id == devices_id).order_by(desc(Comments.comment_id)).all()
 
+@app.get('/get-parish-names/')
+def get_parish_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Parishes).all()
+
 @app.get('/get-location-names/')
 def get_location_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Locations).all()
+
+@app.get('/get-division-names/')
+def get_division_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Divisions).all()
+
+@app.get('/get-branch-names/')
+def get_branch_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
+    return db.query(Branches).all()
 
 @app.get("/get-all-locations/")
 def get_all_locations(db: Session = Depends(get_db)):
@@ -2786,9 +2899,6 @@ def get_all_locations(db: Session = Depends(get_db)):
         print(f"Error fetching location data: {e}")
         raise HTTPException(status_code=500, detail="Error retrieving location data.")
 
-@app.get('/get-parish-names/')
-def get_parish_names_view(current_user: user_dependency, db: Session=Depends(get_db)):
-    return db.query(Parishes).all()
 
 @app.get('/get-items-delivery-date/')
 def get_items_delivery_date_view(delivery_date: date, current_user: user_dependency, db: Session=Depends(get_db)):
@@ -3004,6 +3114,7 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
         raise HTTPException(status_code=404, detail="Device not found")
     
     device.client_id = None
+    device.unassigned_on = datetime.now().strftime("%Y-%m-%d")
     db.commit()
 
     return {"message": "Device has been unassigned from the client"}
@@ -3067,10 +3178,28 @@ def filter_deployment_date(
     ]
 
 
-@app.post("/filter-devices/")
+@app.get("/filter-devices/")
 def filter_devices(
-    filters: FilterRequest,
     current_user: user_dependency,
+    components: Optional[list[str]] = Query(None),
+    parishes: Optional[list[str]] = Query(None),
+    locations: Optional[list[str]] = Query(None),
+    divisions: Optional[list[str]] = Query(None),
+    branches: Optional[list[str]] = Query(None),
+    statuses: Optional[list[str]] = Query(None),
+
+    delivery_year: Optional[int] = None,
+    delivery_month: Optional[int] = None,
+    delivery_quarter: Optional[int] = None,
+
+    deployment_year: Optional[int] = None,
+    deployment_month: Optional[int] = None,
+    deployment_quarter: Optional[int] = None,
+
+    returned_year: Optional[int] = None,
+    returned_month: Optional[int] = None,
+    returned_quarter: Optional[int] = None,
+
     db: Session = Depends(get_db)
 ):
     query = (
@@ -3082,28 +3211,114 @@ def filter_devices(
             Devices.serial_number,
             Devices.inventory_number,
             Devices.delivery_date,
+            Devices.deployment_date,
             SystemStatus.status_description,
             Locations.location_name,
             Parishes.parish_name,
+            Divisions.division_name,
+            Branches.branch_name,
         )
-        .join(SystemStatus, Devices.status_id == SystemStatus.status_id, isouter=True)
-        .join(Divisions, Devices.division_id == Divisions.division_id, isouter=True)
-        .join(DivisionLocation, DivisionLocation.division_id == Divisions.division_id, isouter=True)
-        .join(Locations, Locations.location_id == DivisionLocation.location_id, isouter=True)
-        .join(Parishes, Locations.parish_id == Parishes.parish_id, isouter=True)
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+        .outerjoin(Locations, Devices.location_id == Locations.location_id)
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(Branches, Devices.branch_id == Branches.branch_id)
+        
     )
 
-    if filters.locations:
-        query = query.filter(Locations.location_name.in_(filters.locations))
+    print("Parishes:", parishes, type(parishes))
+    print("Statuses:", statuses, type(statuses))
 
-    if filters.parishes:
-        query = query.filter(Parishes.parish_name.in_(filters.parishes))
+    if components:
+        query = query.filter(
+            Devices.category.in_(components)
+        )
 
-    if filters.statuses:
-        query = query.filter(SystemStatus.status_description.in_(filters.statuses))
+    # Filter by parish
+    if parishes:
+        query = query.filter(
+            Parishes.parish_name.in_(parishes)
+        )
 
-    if filters.components:
-        query = query.filter(Devices.category.in_(filters.components))
+    # Filter by location
+    if locations:
+        query = query.filter(
+            Locations.location_name.in_(locations)
+        )
+
+    # Filter by division
+    if divisions:
+        query = query.filter(
+            Divisions.division_name.in_(divisions)
+        )
+
+    # Filter by branch
+    if branches:
+        query = query.filter(
+            Branches.branch_name.in_(branches)
+        )
+
+    # Filter by status
+    if statuses:
+        query = query.filter(
+            SystemStatus.status_description.in_(statuses)
+        )
+
+
+    # Filter by deliver year
+    if delivery_year is not None:
+            query = query.filter(
+                extract("year", Devices.delivery_date) == delivery_year
+            )
+
+    # Filter by deliver month
+    if delivery_month is not None:
+        query = query.filter(
+            extract("month", Devices.delivery_date) == delivery_month
+        )
+
+    # Filter by deliver quarter
+    if delivery_quarter is not None:
+        query = query.filter(
+            extract("quarter", Devices.delivery_date) == delivery_quarter
+        )
+
+
+    # Filter by deployment year
+    if deployment_year is not None:
+            query = query.filter(
+                extract("year", Devices.deployment_date) == deployment_year
+            )
+
+    # Filter by deployment month
+    if deployment_month is not None:
+        query = query.filter(
+            extract("month", Devices.deployment_date) == deployment_month
+        )
+
+    # Filter by deployment quarter
+    if deployment_quarter is not None:
+        query = query.filter(
+            extract("quarter", Devices.deployment_date) == deployment_quarter
+        )
+
+    # Filter by deployment year
+    if returned_year is not None:
+            query = query.filter(
+                extract("year", Devices.deployment_date) == deployment_year
+            )
+
+    # Filter by deployment month
+    if returned_month is not None:
+        query = query.filter(
+            extract("month", Devices.deployment_date) == deployment_month
+        )
+
+    # Filter by deployment quarter
+    if returned_quarter is not None:
+        query = query.filter(
+            extract("quarter", Devices.deployment_date) == deployment_quarter
+        )
 
     results = query.all()
 
@@ -3116,9 +3331,12 @@ def filter_devices(
             "serial_number": r.serial_number,
             "inventory_number": r.inventory_number,
             "delivery_date": r.delivery_date,
+            "deployment_date": r.deployment_date,
             "status_description": r.status_description,
             "location_name": r.location_name,
             "parish_name": r.parish_name,
+            "division_name": r.division_name,
+            "branch_name": r.branch_name,
         }
         for r in results
     ]

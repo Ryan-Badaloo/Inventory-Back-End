@@ -75,6 +75,7 @@ class Devices(Base):
     repaired_by = Column(String(255), nullable=True)
     bos_by = Column(String(255), nullable=True)
     deployed_by = Column(String(255), nullable=True)
+    return_date = Column(Date, nullable=True)
     assigned_on = Column(Date, nullable=True)
     unassigned_on = Column(Date, nullable=True)
 
@@ -191,7 +192,6 @@ class Laptops(Base):
     memory_capacity = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
@@ -213,7 +213,6 @@ class Desktops(Base):
     memory_capacity = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
@@ -236,7 +235,6 @@ class Servers(Base):
     memory_capacity = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
@@ -263,7 +261,6 @@ class Tablets(Base):
     memory_capacity = Column(String(255), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     device_size = Column(String(255), nullable=True)
     operating_system = Column(String(255), nullable=True)
     imei_number = Column(String(255), nullable=True)
@@ -331,7 +328,6 @@ class UPS(Base):
 
     ups_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     number_of_outlets = Column(Integer, nullable=False)
-    return_date = Column(Date, nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
 class Speakers(Base):
@@ -339,7 +335,6 @@ class Speakers(Base):
 
     speaker_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     number_of_speakers = Column(Integer, nullable=False)
-    return_date = Column(Date, nullable=True)
     speaker_type_id = Column(Integer, ForeignKey("speaker_type.speaker_type_id", ondelete="SET NULL"), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
@@ -355,7 +350,6 @@ class Printers(Base):
     __tablename__ = "printer"
 
     printer_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    return_date = Column(Date, nullable=True)
     ip_address = Column(String(255), nullable=True)
     feature_id = Column(Integer, nullable=True)
     connection_type_id = Column(Integer, nullable=True)
@@ -389,7 +383,6 @@ class NetworkSwitches(Base):
     network_switch_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     number_of_ports = Column(Integer, nullable=True)
     device_size = Column(String(255), nullable=True)
@@ -408,7 +401,6 @@ class Monitors(Base):
     monitor_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
-    return_date = Column(Date, nullable=True)
     manufactured_date = Column(Date, nullable=True)
     monitor_size = Column(String(255), nullable=True)
     monitor_type_id = Column(Integer, ForeignKey("monitor_type.monitor_type_id", ondelete="SET NULL"))
