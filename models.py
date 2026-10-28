@@ -39,10 +39,11 @@ class Clients(Base):
     phone_number = Column(String(255), nullable=True)
     position = Column(String(255), nullable=True)
     devices_id = Column(Integer, nullable=True)
-    parish_id = Column(Integer, nullable=True)
-    location_id = Column(Integer, nullable=True)
-    ltype_id = Column(Integer, nullable=True)
-    division_id = Column(Integer, nullable=True)
+    parish_id = Column(Integer, ForeignKey("parish.parish_id", ondelete="SET NULL"), nullable=True)
+    division_id = Column(Integer, ForeignKey("division.division_id", ondelete="SET NULL"), nullable=True)
+    location_id = Column(Integer, ForeignKey("location.location_id", ondelete="SET NULL"), nullable=True)
+    ltype_id = Column(Integer, ForeignKey("location_type.ltype_id", ondelete="SET NULL"), nullable=True)
+    branch_id = Column(Integer, ForeignKey("branch.branch_id", ondelete="SET NULL"), nullable=True)
     date_created = Column(Date, nullable=True)
     last_updated = Column(Date, nullable=True)
     added_by = Column(String(255), nullable=True)
@@ -71,13 +72,12 @@ class Devices(Base):
     client_id = Column(Integer, ForeignKey("clients.client_id", ondelete="SET NULL"), nullable=True)
     added_by = Column(String(255), nullable=True)
     last_updated_by = Column(String(255), nullable=True)
+    last_updated_date = Column(Date, nullable=True)
     repaired_date = Column(Date, nullable=True)
     repaired_by = Column(String(255), nullable=True)
     bos_by = Column(String(255), nullable=True)
     deployed_by = Column(String(255), nullable=True)
     return_date = Column(Date, nullable=True)
-    assigned_on = Column(Date, nullable=True)
-    unassigned_on = Column(Date, nullable=True)
 
 class DeviceFiles(Base):
     __tablename__ = "device_files"
@@ -485,7 +485,11 @@ class CreateClientRequest(BaseModel):
     email: str
     phone_number: str
     position: str
+    parish_id: int
+    ltype_id: int
+    location_id: int
     division_id: int
+    branch_id: int
 
 class Token(BaseModel):
     access_token: str

@@ -1385,7 +1385,11 @@ async def add_client_view(client_model: CreateClientRequest, current_user: user_
                 email = client_model.email,
                 phone_number = client_model.phone_number,
                 position = client_model.position,
+                parish_id = client_model.parish_id,
+                ltype_id = client_model.ltype_id,
+                location_id = client_model.location_id,
                 division_id = client_model.division_id,
+                branch_id = client_model.branch_id,
                 date_created = date.today(),
                 added_by = current_user.firstname + " " + current_user.lastname,
         )
@@ -2549,10 +2553,61 @@ def get_client_view(current_user: user_dependency, name: Optional[str] = None, d
 
     if name:
         search = f"%{name.strip()}%"
-        query = db.query(Clients).filter((Clients.firstname + " " + Clients.lastname).ilike(search)).all()
-        return query
+
+    query = (
+        db.query(
+            Clients, 
+            Parishes.parish_name,
+            Locations.location_name,
+            LocationTypes.ltype_name,
+            Divisions.division_name,
+            Branches.branch_name
+        )
+        .outerjoin(Parishes, Clients.parish_id == Parishes.parish_id)
+        .outerjoin(Locations, Clients.location_id == Locations.location_id)
+        .outerjoin(LocationTypes, Clients.ltype_id == LocationTypes.ltype_id)
+        .outerjoin(Divisions, Clients.division_id == Divisions.division_id)
+        .outerjoin(Branches, Clients.branch_id == Branches.branch_id)
+    )
+
+    if name:
+        rows = query.filter((Clients.firstname + " " + Clients.lastname).ilike(search)).all()
+
     else:
-        return db.query(Clients).all()
+        rows = query.all()
+
+    result_list = []
+
+    for row in rows:
+        client = row[0]
+
+        client_data = {
+            "client_id": client.client_id,
+            "firstname": client.firstname,
+            "lastname": client.lastname,
+            "email": client.email,
+            "phone_number": client.phone_number,
+            "position": client.position,
+            "date_created": client.date_created,
+            "last_updated": client.last_updated,
+            "added_by": client.added_by,
+
+            "parish_id": client.parish_id,
+            "parish_name": row.parish_name,
+            "location_id": client.location_id,
+            "location_name": row.location_name,
+            "ltype_id": client.ltype_id,
+            "ltype_name": row.ltype_name,
+            "division_id": client.division_id,
+            "division_name": row.division_name,
+            "branch_id": client.branch_id,
+            "branch_name": row.branch_name
+        }
+
+        result_list.append(client_data)
+
+    return result_list
+
 
 @app.get('/get-client/')
 def get_client_view(current_user: user_dependency, firstname: str, lastname: str, db: Session=Depends(get_db)):
@@ -3092,7 +3147,13 @@ def assign_device_view(current_user: user_dependency, device_sn: str, client_id:
     if client:
         if device:
             device.client_id = client_id
-            device.assigned_on = datetime.now().strftime("%Y-%m-%d")
+            device.deployment_date = datetime.now().strftime("%Y-%m-%d")
+            device.status_id = 6
+            device.deployed_by = current_user.firstname + " " + current_user.lastname,
+            device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+            device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+            
+
             db.commit()
             db.refresh(device)
             return {"message": "Device assigned successfully", "item_id": device.devices_id, "client": client_id}
@@ -3114,7 +3175,11 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
         raise HTTPException(status_code=404, detail="Device not found")
     
     device.client_id = None
-    device.unassigned_on = datetime.now().strftime("%Y-%m-%d")
+    device.return_date = datetime.now().strftime("%Y-%m-%d")
+    device.status_id = 3
+    device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+    device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+
     db.commit()
 
     return {"message": "Device has been unassigned from the client"}
@@ -3212,12 +3277,15 @@ def filter_devices(
             Devices.inventory_number,
             Devices.delivery_date,
             Devices.deployment_date,
+            Clients.firstname,
+            Clients.lastname,
             SystemStatus.status_description,
             Locations.location_name,
             Parishes.parish_name,
             Divisions.division_name,
             Branches.branch_name,
         )
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
         .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
         .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
         .outerjoin(Locations, Devices.location_id == Locations.location_id)
@@ -3332,6 +3400,7 @@ def filter_devices(
             "inventory_number": r.inventory_number,
             "delivery_date": r.delivery_date,
             "deployment_date": r.deployment_date,
+            "client_name": f"{r.firstname} {r.lastname}" if r.firstname and r.lastname else None,
             "status_description": r.status_description,
             "location_name": r.location_name,
             "parish_name": r.parish_name,
