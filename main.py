@@ -77,7 +77,6 @@ def defualt_user():
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
 origins = [ ORGIN ]
 
 @asynccontextmanager
@@ -103,7 +102,7 @@ app.add_middleware(
 )
 
 # THIS IS THE SECTION THAT DEFINES FUNCTIONS #################################################################
-async def get_current_user(db: db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(db:db_dependency, token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
