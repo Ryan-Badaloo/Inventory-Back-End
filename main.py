@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from jose import jwt, JWTError
 from sqlalchemy import extract, create_engine, Column, Integer, String, Boolean, Float, DateTime, Date, text, or_, and_, desc, func
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.orm import Session, sessionmaker, aliased
 from pydantic import BaseModel
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi import Depends, FastAPI, HTTPException, status, APIRouter, UploadFile, File, Query
@@ -38,7 +38,7 @@ def get_db():
 
 db_dependency = Annotated[Session, Depends(get_db)]
 
-# This function creates a defualt use in database
+# This function creates a defualt user in database
 def defualt_user():
 
     db:Session = SessionLocal()
@@ -75,6 +75,882 @@ def defualt_user():
     finally:
         db.close()
 
+# This function creates defualt roles in database
+def default_roles():
+
+    db:Session = SessionLocal()
+
+    try:
+
+        default_roles = db.query(Roles).first()
+
+        if not default_roles:
+            logging.info("Creating default roles ...")
+
+            role_1 = Roles(
+                role_id = 1,
+                role_name = "Administrator",
+            )
+            db.add(role_1)
+
+            role_2 = Roles(
+                role_id = 2,
+                role_name = "Supervisor",
+            )
+            db.add(role_2)
+
+            role_3 = Roles(
+                role_id = 3,
+                role_name = "Technician",
+            )
+            db.add(role_3)
+
+            role_4 = Roles(
+                role_id = 4,
+                role_name = "View Only",
+            )
+            db.add(role_4)
+
+
+            db.commit()
+
+            logging.info("Default Roles added.")
+        else:
+            logging.info("Roles already exists.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default roles: {str(e)}")
+        db.rollback()
+    finally:
+        db.close()
+
+# This function creates defualt statuses in database
+def default_statuses():
+
+    db:Session = SessionLocal()
+
+    try:
+
+        default_statuses = db.query(SystemStatus).first()
+
+        if not default_statuses:
+            logging.info("Creating default statuses ...")
+
+            status_1 = SystemStatus(
+                status_id = 1,
+                status_description = "Malfunction/Being repaired",
+            )
+            db.add(status_1)
+
+            status_2 = SystemStatus(
+                status_id = 2,
+                status_description = "Being Upgraded",
+            )
+            db.add(status_2)
+
+            status_3 = SystemStatus(
+                status_id = 3,
+                status_description = "Unassigned",
+            )
+            db.add(status_3)
+
+            status_4 = SystemStatus(
+                status_id = 4,
+                status_description = "Stolen",
+            )
+            db.add(status_4)
+
+            status_5 = SystemStatus(
+                status_id = 5,
+                status_description = "BOS",
+            )
+            db.add(status_5)
+
+            status_6 = SystemStatus(
+                status_id = 6,
+                status_description = "Working",
+            )
+            db.add(status_6)
+
+
+            db.commit()
+
+            logging.info("Default Statuses added.")
+        else:
+            logging.info("Statuses already exists.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default Statuses: {str(e)}")
+        db.rollback()
+    finally:
+        db.close()
+
+
+# This function creates default parishes in the database
+def default_parishes():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        default_parishes = db.query(Parishes).first()
+
+        if not default_parishes:
+            logging.info("Creating default parishes ...")
+
+            parish_1 = Parishes(
+                parish_id = 1,
+                parish_name = "Clarendon",
+            )
+            db.add(parish_1)
+
+            parish_2 = Parishes(
+                parish_id = 2,
+                parish_name = "Hanover",
+            )
+            db.add(parish_2)
+
+            parish_3 = Parishes(
+                parish_id = 3,
+                parish_name = "Kingston and Saint Andrew",
+            )
+            db.add(parish_3)
+
+            parish_4 = Parishes(
+                parish_id = 4,
+                parish_name = "Manchester",
+            )
+            db.add(parish_4)
+
+            parish_5 = Parishes(
+                parish_id = 5,
+                parish_name = "Portland",
+            )
+            db.add(parish_5)
+
+            parish_6 = Parishes(
+                parish_id = 6,
+                parish_name = "Saint Ann",
+            )
+            db.add(parish_6)
+
+            parish_7 = Parishes(
+                parish_id = 7,
+                parish_name = "Saint Catherine",
+            )
+            db.add(parish_7)
+
+            parish_8 = Parishes(
+                parish_id = 8,
+                parish_name = "Saint Elizabeth",
+            )
+            db.add(parish_8)
+
+            parish_9 = Parishes(
+                parish_id = 9,
+                parish_name = "Saint James",
+            )
+            db.add(parish_9)
+
+            parish_10 = Parishes(
+                parish_id = 10,
+                parish_name = "Saint Mary",
+            )
+            db.add(parish_10)
+
+            parish_11 = Parishes(
+                parish_id = 11,
+                parish_name = "Saint Thomas",
+            )
+            db.add(parish_11)
+
+            parish_12 = Parishes(
+                parish_id = 12,
+                parish_name = "Trelawny",
+            )
+            db.add(parish_12)
+
+            parish_13 = Parishes(
+                parish_id = 13,
+                parish_name = "Westmoreland",
+            )
+            db.add(parish_13)
+
+            db.commit()
+
+            logging.info("Default parishes added.")
+
+        else:
+            logging.info("Parishes already exist.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default parishes: {str(e)}")
+        db.rollback()
+
+    finally:
+        db.close()
+
+# This function creates default locations in the database
+def default_locations():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        default_locations = db.query(Locations).first()
+
+        if not default_locations:
+            logging.info("Creating default locations ...")
+
+            location_1 = Locations(
+                location_id = 1,
+                location_name = "Head Office - Hope Gardens",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_1)
+
+            location_2 = Locations(
+                location_id = 2,
+                location_name = "PQPI Head Office - Hope Road",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_2)
+
+            location_3 = Locations(
+                location_id = 3,
+                location_name = "VSD Head Office - Hope Road",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_3)
+
+            location_4 = Locations(
+                location_id = 4,
+                location_name = "Library and Museum - Hope Road",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_4)
+
+            location_5 = Locations(
+                location_id = 5,
+                location_name = "ALMD Eastern - Hope Road",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_5)
+
+            location_6 = Locations(
+                location_id = 6,
+                location_name = "One Stop Shop - Newport West",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_6)
+
+            location_7 = Locations(
+                location_id = 7,
+                location_name = "PQPI NMIA Export Complex - Airport Road",
+                parish_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_7)
+
+            location_8 = Locations(
+                location_id = 8,
+                location_name = "Farmer Training Centre - Twickenham Park",
+                parish_id = 7,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_8)
+
+            location_9 = Locations(
+                location_id = 9,
+                location_name = "Bodles R&D Station - Old Harbour",
+                parish_id = 7,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_9)
+
+            location_10 = Locations(
+                location_id = 10,
+                location_name = "VSD St. Catherine Parish Office - Old Harbour",
+                parish_id = 7,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_10)
+
+            location_11 = Locations(
+                location_id = 11,
+                location_name = "VSD Linstead Office - Linstead",
+                parish_id = 7,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_11)
+
+            location_12 = Locations(
+                location_id = 12,
+                location_name = "VSD Clarendon Parish Office - May Pen",
+                parish_id = 1,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_12)
+
+            location_13 = Locations(
+                location_id = 13,
+                location_name = "PQPI Manchester Office - Mandeville",
+                parish_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_13)
+
+            location_14 = Locations(
+                location_id = 14,
+                location_name = "VSD Manchester Office - Mandeville",
+                parish_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_14)
+
+            location_15 = Locations(
+                location_id = 15,
+                location_name = "VSD St. Elizabeth Office",
+                parish_id = 8,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_15)
+
+            location_16 = Locations(
+                location_id = 16,
+                location_name = "Hounslow R&D Station",
+                parish_id = 8,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_16)
+
+            location_17 = Locations(
+                location_id = 17,
+                location_name = "VSD Westmoreland Office - Landilo",
+                parish_id = 13,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_17)
+
+            location_18 = Locations(
+                location_id = 18,
+                location_name = "VSD Hanover Office",
+                parish_id = 2,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_18)
+
+            location_19 = Locations(
+                location_id = 19,
+                location_name = "VSD Western Office - Catherine Hall Montego Bay",
+                parish_id = 9,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_19)
+
+            location_20 = Locations(
+                location_id = 20,
+                location_name = "Montpellier R&D Station - Montpellier District",
+                parish_id = 9,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_20)
+
+            location_21 = Locations(
+                location_id = 21,
+                location_name = "PQPI SIA Export Complex - Montego Bay",
+                parish_id = 9,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_21)
+
+            location_22 = Locations(
+                location_id = 22,
+                location_name = "VSD Trelawny Parish Office - Falmouth",
+                parish_id = 12,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_22)
+
+            location_23 = Locations(
+                location_id = 23,
+                location_name = "VSD St. Ann Parish Office - St. Ann Bay",
+                parish_id = 6,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_23)
+
+            location_24 = Locations(
+                location_id = 24,
+                location_name = "PQPI St. Ann - Ocho Rios",
+                parish_id = 6,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_24)
+
+            location_25 = Locations(
+                location_id = 25,
+                location_name = "Eltham Training Centre - Eltham",
+                parish_id = 6,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_25)
+
+            location_26 = Locations(
+                location_id = 26,
+                location_name = "Orange River R&D Station - Orange River",
+                parish_id = 10,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_26)
+
+            location_27 = Locations(
+                location_id = 27,
+                location_name = "VSD St. Mary Parish Office - Orange River",
+                parish_id = 10,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_27)
+
+            location_28 = Locations(
+                location_id = 28,
+                location_name = "Castleton Gardens - Castleton",
+                parish_id = 10,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_28)
+
+            location_29 = Locations(
+                location_id = 29,
+                location_name = "VSD Portland Parish Office - Port Antonio",
+                parish_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_29)
+
+            location_30 = Locations(
+                location_id = 30,
+                location_name = "PQPI Portland Office - Port Antonio",
+                parish_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_30)
+
+            location_31 = Locations(
+                location_id = 31,
+                location_name = "Bath Public Gardens - Bath",
+                parish_id = 11,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_31)
+
+            location_32 = Locations(
+                location_id = 32,
+                location_name = "VSD St. Thomas Parish Office - Morant Bay",
+                parish_id = 11,
+                added_by = None,
+                date_added = date(2026, 11, 2),
+            )
+            db.add(location_32)
+
+            db.commit()
+
+            logging.info("Default locations added.")
+
+        else:
+            logging.info("Locations already exist.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default locations: {str(e)}")
+        db.rollback()
+
+    finally:
+        db.close()
+
+# This function creates default location types in the database
+def default_location_types():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        default_location_types = db.query(LocationTypes).first()
+
+        if not default_location_types:
+            logging.info("Creating default location types ...")
+
+            location_type_1 = LocationTypes(
+                ltype_id = 1,
+                ltype_name = "Ministry",
+            )
+            db.add(location_type_1)
+
+            location_type_2 = LocationTypes(
+                ltype_id = 2,
+                ltype_name = "Agency",
+            )
+            db.add(location_type_2)
+
+            location_type_3 = LocationTypes(
+                ltype_id = 3,
+                ltype_name = "Department/Division",
+            )
+            db.add(location_type_3)
+
+            db.commit()
+
+            logging.info("Default location types added.")
+
+        else:
+            logging.info("Location types already exist.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default location types: {str(e)}")
+        db.rollback()
+
+    finally:
+        db.close()
+
+# This function creates default divisions in the database
+def default_divisions():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        default_divisions = db.query(Divisions).first()
+
+        if not default_divisions:
+            logging.info("Creating default divisions ...")
+
+            division_1 = Divisions(
+                division_id = 3,
+                division_name = "Executive Office",
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(division_1)
+
+            division_2 = Divisions(
+                division_id = 4,
+                division_name = "Corporate Services",
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(division_2)
+
+            division_3 = Divisions(
+                division_id = 5,
+                division_name = "Technical Services Division ",
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(division_3)
+
+            db.commit()
+
+            logging.info("Default divisions added.")
+
+        else:
+            logging.info("Divisions already exist.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default divisions: {str(e)}")
+        db.rollback()
+
+    finally:
+        db.close()
+
+from datetime import date
+
+# This function creates default branches in the database
+def default_branches():
+
+    db: Session = SessionLocal()
+
+    try:
+
+        default_branches = db.query(Branches).first()
+
+        if not default_branches:
+            logging.info("Creating default branches ...")
+
+            branch_1 = Branches(
+                branch_id = 1,
+                branch_name = "Office of the Minister",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_1)
+
+            branch_2 = Branches(
+                branch_id = 2,
+                branch_name = "Officer of the Minister of State",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_2)
+
+            branch_3 = Branches(
+                branch_id = 3,
+                branch_name = "Office of the PS",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_3)
+
+            branch_4 = Branches(
+                branch_id = 4,
+                branch_name = "Office of CTD Technical Service",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_4)
+
+            branch_5 = Branches(
+                branch_id = 5,
+                branch_name = "Office of CTD Special Project",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_5)
+
+            branch_6 = Branches(
+                branch_id = 6,
+                branch_name = "Office of CTD Policy and Plannin",
+                division_id = 3,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_6)
+
+            branch_7 = Branches(
+                branch_id = 7,
+                branch_name = "ICT - Office of the Director",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_7)
+
+            branch_8 = Branches(
+                branch_id = 8,
+                branch_name = "ICT - Technical and User Support",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_8)
+
+            branch_9 = Branches(
+                branch_id = 9,
+                branch_name = "ICT - Application Development",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_9)
+
+            branch_10 = Branches(
+                branch_id = 10,
+                branch_name = "ICT - ICT Infrastructure Services",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_10)
+
+            branch_11 = Branches(
+                branch_id = 11,
+                branch_name = "ICT - ICT Security",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_11)
+
+            branch_12 = Branches(
+                branch_id = 12,
+                branch_name = "FPMD - Office of the Director",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_12)
+
+            branch_13 = Branches(
+                branch_id = 13,
+                branch_name = "FPMD - Office Services",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_13)
+
+            branch_14 = Branches(
+                branch_id = 14,
+                branch_name = "FPMD - Energy, safety and security",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_14)
+
+            branch_15 = Branches(
+                branch_id = 15,
+                branch_name = "Procurement",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_15)
+
+            branch_16 = Branches(
+                branch_id = 16,
+                branch_name = "HRMD - HRM Info Record",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_16)
+
+            branch_17 = Branches(
+                branch_id = 17,
+                branch_name = "HRMD - HRM Staffing",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_17)
+
+            branch_18 = Branches(
+                branch_id = 18,
+                branch_name = "HRMD - HRM OD",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_18)
+
+            branch_19 = Branches(
+                branch_id = 19,
+                branch_name = "HRMD - HRM Benefit",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_19)
+
+            branch_20 = Branches(
+                branch_id = 20,
+                branch_name = "HRMD - HRM IR",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_20)
+
+            branch_21 = Branches(
+                branch_id = 21,
+                branch_name = "HRMD - HRD",
+                division_id = 4,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_21)
+
+            branch_22 = Branches(
+                branch_id = 22,
+                branch_name = "Research and Development Division",
+                division_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_22)
+
+            branch_23 = Branches(
+                branch_id = 23,
+                branch_name = "PQPI Branch",
+                division_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_23)
+
+            branch_24 = Branches(
+                branch_id = 24,
+                branch_name = "VSD Branch",
+                division_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_24)
+
+            branch_25 = Branches(
+                branch_id = 25,
+                branch_name = "ALMD Branch",
+                division_id = 5,
+                added_by = None,
+                date_added = date(2026, 11, 4),
+            )
+            db.add(branch_25)
+
+            db.commit()
+
+            logging.info("Default branches added.")
+
+        else:
+            logging.info("Branches already exist.")
+
+    except Exception as e:
+        logging.error(f"Error in creating default branches: {str(e)}")
+        db.rollback()
+
+    finally:
+        db.close()
+
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -84,6 +960,14 @@ origins = [ ORGIN ]
 async def lifespan(application: FastAPI):
     logging.info("Application start up ...")
     defualt_user()
+    default_roles()
+    default_statuses()
+    default_parishes()
+    default_locations()
+    default_location_types()
+    default_divisions()
+    default_branches()
+
     yield
     logging.info("Application shutting down")
 
@@ -224,18 +1108,6 @@ async def change_user_password(user_password_set: ChangeUserPasswordRequest, cur
         )
 
 
-@app.delete('/delete-user/')
-def delete_user_view(first_name: str, last_name: str, email: str, current_user: user_dependency, db: Session=Depends(get_db)):
-    deleted = db.query(Users).filter(Users.firstname == first_name, Users.lastname == last_name, Users.email == email).delete()
-    db.commit()
-
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    return {"message": "User has been deleted"}
-
-
-
 
 @app.post("/token")
 async def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
@@ -256,13 +1128,9 @@ async def login_for_access_token(db: db_dependency, form_data: Annotated[OAuth2P
 async def read_users_me(current_user: user_dependency):
     return current_user
 
-# @app.get("/db-test")
-# def test_database_connection(db: Session = Depends(get_db)):
-#     try:
-#         db.execute(text("SELECT 1"))
-#         return JSONResponse(status_code=200, content={"message": "Database connection successful."})
-#     except Exception as e:
-#         return JSONResponse(status_code=500, content={"message": "Database connection failed.", "error": str(e)})
+
+
+
 
 
 ######################### SECTION FOR ADDING INFORMATION #######################################
@@ -290,6 +1158,37 @@ def add_device_view(device: DeviceRequest, current_user: user_dependency, db: Se
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
+
+@app.post('/add-workbench/')
+def add_workbench_view(current_user: user_dependency, workbench_name: str, client_id: Optional[int] = None,  db: Session=Depends(get_db)):
+
+    workbenchExists = db.query(Workbenches).filter(Workbenches.workbench_name == workbench_name).first()
+
+    if workbenchExists:
+        return {"message": "Workbench name is taken"}
+
+    else:
+        try:
+            workbench_section = Workbenches(
+                workbench_name = workbench_name,
+                client_id = client_id,
+                date_created = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
+            )
+
+            db.add(workbench_section)
+            
+            db.commit()
+            db.refresh(workbench_section)
+            return {"message": "Workbench Has Been Created"}
+
+
+        except Exception as e:
+            db.rollback()
+            raise HTTPException(status_code=400, detail=str(e))
+
+            
+
 
 @app.post('/add-laptop/')
 def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Session=Depends(get_db)):
@@ -321,11 +1220,12 @@ def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Se
                 division_id = laptop.division_id,
                 location_id = laptop.location_id,
                 branch_id = laptop.branch_id,
+                workbench_id = laptop.workbench_id,
                 added_by = current_user.firstname + " " + current_user.lastname,
             )
 
-            print("Testing the ltype and branch id")
-            print(laptop.ltype_id, laptop.branch_id)
+            print("Testing the Workbench", laptop.workbench_id)
+
 
             db.add(device_section)
             db.flush()
@@ -357,6 +1257,8 @@ def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Se
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = laptop.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -396,30 +1298,31 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
         else:
             device_section = Devices(
 
-            category=desktop.category,
-            brand=desktop.brand,
-            model=desktop.model,
+                category=desktop.category,
+                brand=desktop.brand,
+                model=desktop.model,
 
-            serial_number=desktop.serial_number,
-            inventory_number=desktop.inventory_number,
+                serial_number=desktop.serial_number,
+                inventory_number=desktop.inventory_number,
 
-            delivery_date=desktop.delivery_date,
-            deployment_date=desktop.deployment_date,
-            bos_date=desktop.bos_date,
-            return_date=desktop.return_date,
+                delivery_date=desktop.delivery_date,
+                deployment_date=desktop.deployment_date,
+                bos_date=desktop.bos_date,
+                return_date=desktop.return_date,
 
-            supplier_name=desktop.supplier_name,
-            device_cost=desktop.device_cost,
+                supplier_name=desktop.supplier_name,
+                device_cost=desktop.device_cost,
 
-            status_id=desktop.status_id,
-            parish_id = desktop.parish_id,
-            ltype_id = desktop.ltype_id,
-            division_id = desktop.division_id,
-            location_id = desktop.location_id,
-            branch_id = desktop.branch_id,
+                status_id=desktop.status_id,
+                parish_id = desktop.parish_id,
+                ltype_id = desktop.ltype_id,
+                division_id = desktop.division_id,
+                location_id = desktop.location_id,
+                branch_id = desktop.branch_id,
+                workbench_id = desktop.workbench_id,
 
-            added_by=current_user.firstname + " " + current_user.lastname,
-        )
+                added_by=current_user.firstname + " " + current_user.lastname,
+            )
 
 
         db.add(device_section)
@@ -467,8 +1370,9 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
             comment_section = Comments(
 
                 devices_id=device_section.devices_id,
-
                 comment_value=desktop.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -530,6 +1434,7 @@ def add_server_view(server: ServerRequest, current_user: user_dependency, db: Se
                 division_id = server.division_id,
                 location_id = server.location_id,
                 branch_id = server.branch_id,
+                workbench_id = server.workbench_id,
                 added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -567,6 +1472,8 @@ def add_server_view(server: ServerRequest, current_user: user_dependency, db: Se
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = server.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -610,6 +1517,7 @@ def add_tablet_view(data: AddTabletRequest, current_user: user_dependency, db: S
                     division_id = data.tablet.division_id,
                     location_id = data.tablet.location_id,
                     branch_id = data.tablet.branch_id,
+                    workbench_id = data.tablet.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -668,6 +1576,8 @@ def add_tablet_view(data: AddTabletRequest, current_user: user_dependency, db: S
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = data.tablet.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -709,6 +1619,7 @@ def add_mouse_keyboard_view(mouse_keyboard: MouseKeyboardRequest, current_user: 
                     division_id = mouse_keyboard.division_id,
                     location_id = mouse_keyboard.location_id,
                     branch_id = mouse_keyboard.branch_id,
+                    workbench_id = mouse_keyboard.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -725,6 +1636,8 @@ def add_mouse_keyboard_view(mouse_keyboard: MouseKeyboardRequest, current_user: 
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = mouse_keyboard.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -766,6 +1679,7 @@ def add_scanner_view(scanner: ScannerRequest, current_user: user_dependency, db:
                     division_id = scanner.division_id,
                     location_id = scanner.location_id,
                     branch_id = scanner.branch_id,
+                    workbench_id = scanner.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -784,6 +1698,8 @@ def add_scanner_view(scanner: ScannerRequest, current_user: user_dependency, db:
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = scanner.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -825,6 +1741,7 @@ def add_surge_protector_view(surge_protector: SurgeProtectorRequest, current_use
                     division_id = surge_protector.division_id,
                     location_id = surge_protector.location_id,
                     branch_id = surge_protector.branch_id,
+                    workbench_id = surge_protector.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -842,6 +1759,8 @@ def add_surge_protector_view(surge_protector: SurgeProtectorRequest, current_use
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = surge_protector.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -884,6 +1803,7 @@ def add_ups_view(ups: UPSRequest, current_user: user_dependency, db: Session=Dep
                     division_id = ups.division_id,
                     location_id = ups.location_id,
                     branch_id = ups.branch_id,
+                    workbench_id = ups.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -901,6 +1821,8 @@ def add_ups_view(ups: UPSRequest, current_user: user_dependency, db: Session=Dep
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = ups.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -943,6 +1865,7 @@ def add_speaker_view(speaker: SpeakerRequest, current_user: user_dependency, db:
                     division_id = speaker.division_id,
                     location_id = speaker.location_id,
                     branch_id = speaker.branch_id,
+                    workbench_id = speaker.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -962,6 +1885,8 @@ def add_speaker_view(speaker: SpeakerRequest, current_user: user_dependency, db:
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = speaker.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1003,6 +1928,7 @@ def add_webcam_view(webcam: DeviceRequest, current_user: user_dependency, db: Se
                     division_id = webcam.division_id,
                     location_id = webcam.location_id,
                     branch_id = webcam.branch_id,
+                    workbench_id = webcam.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1012,6 +1938,8 @@ def add_webcam_view(webcam: DeviceRequest, current_user: user_dependency, db: Se
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = webcam.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1052,6 +1980,7 @@ def add_other_equipment_view(other_equipment: OtherEquipmentRequest, current_use
                     division_id = other_equipment.division_id,
                     location_id = other_equipment.location_id,
                     branch_id = other_equipment.branch_id,
+                    workbench_id = other_equipment.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1069,6 +1998,8 @@ def add_other_equipment_view(other_equipment: OtherEquipmentRequest, current_use
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = other_equipment.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1101,6 +2032,7 @@ def add_printer_view(printer: PrinterRequest, current_user: user_dependency, db:
             division_id = printer.division_id,
             location_id = printer.location_id,
             branch_id = printer.branch_id,
+            workbench_id = printer.workbench_id,
             added_by = current_user.firstname + " " + current_user.lastname,
         )
 
@@ -1119,6 +2051,8 @@ def add_printer_view(printer: PrinterRequest, current_user: user_dependency, db:
         comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = printer.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
         db.add(comment_section)
@@ -1160,6 +2094,7 @@ def add_projector_view(projector: DeviceRequest, current_user: user_dependency, 
                     division_id = projector.division_id,
                     location_id = projector.location_id,
                     branch_id = projector.branch_id,
+                    workbench_id = projector.workbench_id,
                     added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1169,6 +2104,8 @@ def add_projector_view(projector: DeviceRequest, current_user: user_dependency, 
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = projector.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1208,6 +2145,7 @@ def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, current_user: 
             division_id = crav_equipment.division_id,
             location_id = crav_equipment.location_id,
             branch_id = crav_equipment.branch_id,
+            workbench_id = crav_equipment.workbench_id,
             added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1228,6 +2166,8 @@ def add_crav_equipment_view(crav_equipment: CRAVEquipmentRequest, current_user: 
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = crav_equipment.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1270,6 +2210,7 @@ def add_network_switch_view(network_switch: NetworkSwitchRequest, current_user: 
                 division_id = network_switch.division_id,
                 location_id = network_switch.location_id,
                 branch_id = network_switch.branch_id,
+                workbench_id = network_switch.workbench_id,
                 added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1295,6 +2236,8 @@ def add_network_switch_view(network_switch: NetworkSwitchRequest, current_user: 
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = network_switch.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1337,6 +2280,7 @@ def add_monitor_view(monitor: MonitorRequest, current_user: user_dependency, db:
                 division_id = monitor.division_id,
                 location_id = monitor.location_id,
                 branch_id = monitor.branch_id,
+                workbench_id = monitor.workbench_id,
                 added_by = current_user.firstname + " " + current_user.lastname,
             )
 
@@ -1359,6 +2303,8 @@ def add_monitor_view(monitor: MonitorRequest, current_user: user_dependency, db:
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = monitor.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(comment_section)
@@ -1407,6 +2353,8 @@ def add_comments_view(comment: CommentCreate, current_user: user_dependency, db:
             new_comment = Comments(
                 devices_id = comment.id,
                 comment_value = comment.comment,
+                created_at = datetime.now(),
+                added_by = current_user.firstname + " " + current_user.lastname,
             )
 
             db.add(new_comment)
@@ -1600,15 +2548,24 @@ def add_bag_fabric_type_view(bag_fabric_type: BagFabricTypeCreate, current_user:
         db.rollback()
         raise HTTPException(status_code=400, detail=str(e))
 
+
+
+
+
 ######################### SECTION FOR GETTING INFORMATION #######################################
 @app.get('/get-items/')
 def get_items_view(
     current_user: user_dependency,
     device_type: Optional[str] = None,
     serial_number: Optional[str] = None,
+    inventory_number: Optional[str] = None,
     client: Optional[str] = None,
     status: Optional[str] = None,
     division: Optional[str] = None,
+    workbench_id: Optional[int] = None,
+    client_id: Optional[int] = None,
+    verified: Optional[bool] = None,
+    to_delete: Optional[bool] = None,
     db: Session=Depends(get_db)
     ):
 
@@ -1644,6 +2601,22 @@ def get_items_view(
 
     if serial_number:
         query = query.filter(Devices.serial_number.ilike(f"%{serial_number}%"))
+
+    if inventory_number:
+        query = query.filter(Devices.inventory_number.ilike(f"%{inventory_number}%"))
+
+    if workbench_id:
+        query = query.filter(Devices.workbench_id == workbench_id)
+
+    if client_id:
+        query = query.filter(Devices.client_id == client_id)
+
+    if verified and verified == True:
+        query = query.filter(Devices.verification == False)
+
+    if to_delete and to_delete == True:
+        query = query.filter(Devices.pending_delete == True)
+
         
     # if filter == "Delivery Date":
     #     parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
@@ -1686,8 +2659,12 @@ def get_items_view(
             "branch_name": branch_name,
             "client_id": device.client_id,
             "client_name": client_name, 
+            "verification": device.verification,
+            "pending_delete": device.pending_delete,
+            "pending_delete_by": device.pending_delete_by,
         }
         result_list.append(item)
+        print(item)
 
 
     return result_list
@@ -1698,6 +2675,7 @@ def get__unassigned_items_view(
     current_user: user_dependency, 
     device_type: Optional[str] = None,
     serial_number: Optional[str] = None,
+    inventory_number: Optional[str] = None,
     status: Optional[str] = None,
     division: Optional[str] = None,
     db: Session=Depends(get_db)):
@@ -1728,6 +2706,9 @@ def get__unassigned_items_view(
 
     if serial_number:
         query = query.filter(Devices.serial_number.ilike(f"%{serial_number}%"))
+
+    if inventory_number:
+            query = query.filter(Devices.inventory_number.ilike(f"%{inventory_number}%"))
 
 
     rows = query.all()
@@ -1763,6 +2744,7 @@ def get_items_view(
     current_user: user_dependency, 
     device_type: Optional[str] = None,
     serial_number: Optional[str] = None,
+    inventory_number: Optional[str] = None,
     client: Optional[str] = None,
     status: Optional[str] = None,
     division: Optional[str] = None,
@@ -1794,6 +2776,9 @@ def get_items_view(
 
     if serial_number:
         query = query.filter(Devices.serial_number.ilike(f"%{serial_number}%"))
+
+    if inventory_number:
+            query = query.filter(Devices.inventory_number.ilike(f"%{inventory_number}%"))
         
     # if filter == "Delivery Date":
     #     parsed_date = datetime.strptime(input, "%Y-%m-%d").date()
@@ -1840,517 +2825,296 @@ def get_items_view(
 
     return result_list
 
+
+@app.get('/get-unassigned-workbenches/')
+def get_unassigned_workbenches_view(current_user: user_dependency, workbench_name: Optional[str] = None, db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+            Workbenches, 
+            Clients.firstname,
+            Clients.lastname
+        )
+        .outerjoin(Clients, Workbenches.client_id == Clients.client_id)
+        .filter(Workbenches.client_id == None)
+    )
+
+    if workbench_name:
+        search = f"%{workbench_name.strip()}%"
+        rows = query.filter((Workbenches.workbench_name).ilike(search)).all()
+
+    else:
+        rows = query.all()
+
+    result_list = []
+
+    for row in rows:
+        print(row.firstname)
+        workbench = row[0]
+
+        workbench_data = {
+            "workbench_id": workbench.workbench_id,
+            "workbench_name": workbench.workbench_name,
+            "client_name": (f"{row.firstname} {row.lastname}" if row.firstname is not None and row.lastname is not None else "No Client"),
+            "date_created": workbench.date_created,
+            "added_by": workbench.added_by,
+            
+        }
+
+        result_list.append(workbench_data)
+
+    return result_list
+
+@app.get('/get-assigned-workbenches/')
+def get_assigned_workbenches_view(
+    current_user: user_dependency, 
+    workbench_name: Optional[str] = None,
+    db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+                    Workbenches, 
+                    Clients.firstname,
+                    Clients.lastname
+                )
+                .outerjoin(Clients, Workbenches.client_id == Clients.client_id)
+                .filter(Workbenches.client_id != None)
+            )
+
+    if workbench_name:
+        search = f"%{workbench_name.strip()}%"
+        rows = query.filter((Workbenches.workbench_name).ilike(search)).all()
+
+    else:
+        rows = query.all()
+
+    result_list = []
+
+    for row in rows:
+        print(row.firstname)
+        workbench = row[0]
+        
+        workbench_data = {
+            "workbench_id": workbench.workbench_id,
+            "workbench_name": workbench.workbench_name,
+            "client_name": (f"{row.firstname} {row.lastname}" if row.firstname is not None and row.lastname is not None else "No Client"),
+            "date_created": workbench.date_created,
+            "added_by": workbench.added_by,
+        
+        }
+        
+        result_list.append(workbench_data)
+        
+    return result_list
+
+
 @app.get('/get-item-sn/')
 def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_db)):
 
+    BagStatus = aliased(SystemStatus)
+    AdapterStatus = aliased(SystemStatus)
+
+    result = (
+        db.query(
+            Devices,
+            SystemStatus.status_description,
+            Parishes.parish_name,
+            LocationTypes.ltype_name,
+            Locations.location_name,
+            Divisions.division_name,
+            Branches.branch_name,
+            Clients,
+            Workbenches.workbench_name
+        )
+        .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
+        .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+        .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
+        .outerjoin(Locations, Devices.location_id == Locations.location_id)
+        .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
+        .outerjoin(Branches, Devices.branch_id == Branches.branch_id)
+        .outerjoin(Clients, Devices.client_id == Clients.client_id)
+        .outerjoin(Workbenches, Devices.workbench_id == Workbenches.workbench_id)
+    )
 
     if category == "Laptop":
-
+    
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                CPUTypes,
-                Laptops
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(CPUTypes, Laptops)
             .outerjoin(Laptops, Devices.devices_id == Laptops.devices_id)
             .outerjoin(CPUTypes, Laptops.cpu_type_id == CPUTypes.cpu_type_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif category == "Desktop":
 
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                CPUTypes,
-                FormFactors,
-                Desktops
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)            
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(CPUTypes, FormFactors, Desktops)
             .outerjoin(Desktops, Devices.devices_id == Desktops.devices_id)
             .outerjoin(CPUTypes, Desktops.cpu_type_id == CPUTypes.cpu_type_id)
             .outerjoin(FormFactors, Desktops.form_factor_id == FormFactors.form_factor_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif category == "Server":
 
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                CPUTypes,
-                FormFactors,
-                RaidTypes,
-                Servers
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(CPUTypes, FormFactors, RaidTypes, Servers)
             .outerjoin(Servers, Devices.devices_id == Servers.devices_id)
             .outerjoin(CPUTypes, Servers.cpu_type_id == CPUTypes.cpu_type_id)
             .outerjoin(FormFactors, Servers.form_factor_id == FormFactors.form_factor_id)
             .outerjoin(RaidTypes, Servers.raid_type_id == RaidTypes.raid_type_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif category == "Tablet":
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                Tablets,
-                Bags,
-                Adapters,
-                BagTypes,
-                BagFabricTypes,
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id)             
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(Tablets, Bags, Adapters, BagTypes, BagFabricTypes, BagStatus.status_description, AdapterStatus.status_description)
             .outerjoin(Tablets, Devices.devices_id == Tablets.devices_id)
             .outerjoin(Bags, Devices.devices_id == Bags.devices_id)
             .outerjoin(Adapters, Devices.devices_id == Adapters.devices_id)
             .outerjoin(BagTypes, Bags.bag_type_id == BagTypes.bag_type_id)
             .outerjoin(BagFabricTypes, Bags.bag_fabric_type_id == BagFabricTypes.bag_fabric_type_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
+            .outerjoin(BagStatus, Bags.bag_status_id == BagStatus.status_id)
+            .outerjoin(AdapterStatus, Adapters.adapter_status_id == AdapterStatus.status_id)
         )
 
 
     elif (category == "Mouse") or (category == "Keyboard"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                ConnectionTypes,
-                MouseKeyboards
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(ConnectionTypes, MouseKeyboards)
             .outerjoin(MouseKeyboards, Devices.devices_id == MouseKeyboards.devices_id)
             .outerjoin(ConnectionTypes, MouseKeyboards.connection_type_id == ConnectionTypes.ctype_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif (category == "Scanner"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                ConnectionTypes,
-                Scanners
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(ConnectionTypes, Scanners)
             .outerjoin(Scanners, Devices.devices_id == Scanners.devices_id)
             .outerjoin(ConnectionTypes, Scanners.connection_type_id == ConnectionTypes.ctype_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif (category == "Surge Protector"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                SurgeProtectors
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(SurgeProtectors)
             .outerjoin(SurgeProtectors, Devices.devices_id == SurgeProtectors.devices_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif (category == "UPS"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                UPS
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(UPS)
             .outerjoin(UPS, Devices.devices_id == UPS.devices_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif (category == "Speaker"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                SpeakerTypes,
-                Speakers
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(SpeakerTypes, Speakers)
             .outerjoin(Speakers, Devices.devices_id == Speakers.devices_id)
             .outerjoin(SpeakerTypes, Speakers.speaker_type_id == SpeakerTypes.speaker_type_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
-        )
-
-    elif (category == "Webcam"):
-        result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif (category == "Other Equipment"):
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                OtherEquipments
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(OtherEquipments)
             .outerjoin(OtherEquipments, Devices.devices_id == OtherEquipments.devices_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
         
     elif category == "Printer":
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                ConnectionTypes,
-                PrinterFeatures,
-                Printers
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(ConnectionTypes, PrinterFeatures, Printers)
             .outerjoin(Printers, Devices.devices_id == Printers.devices_id)
             .outerjoin(ConnectionTypes, Printers.connection_type_id == ConnectionTypes.ctype_id)
             .outerjoin(PrinterFeatures, Printers.feature_id == PrinterFeatures.feature_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
-        )
-
-    elif (category == "Projector"):
-        result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
         
     elif category == "CRAV":
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                MeetingRooms,
-                CRAVEquipmentTypes,
-                CRAVEquipments
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(MeetingRooms, CRAVEquipmentTypes, CRAVEquipments)
             .outerjoin(CRAVEquipments, Devices.devices_id == CRAVEquipments.devices_id)
             .outerjoin(MeetingRooms, CRAVEquipments.meeting_room_id == MeetingRooms.meeting_room_id)
             .outerjoin(CRAVEquipmentTypes, CRAVEquipments.crav_equipment_type_id == CRAVEquipmentTypes.crav_equipment_type_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
     
     elif category == "Network Switch":
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                NetworkSwitches
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(NetworkSwitches)
             .outerjoin(NetworkSwitches, Devices.devices_id == NetworkSwitches.devices_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
 
     elif category == "Monitor":
         result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-                MonitorTypes,
-                MonitorFunctions,
-                Monitors
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
+            result
+            .add_columns(MonitorTypes, MonitorFunctions, Monitors)
             .outerjoin(Monitors, Devices.devices_id == Monitors.devices_id)
             .outerjoin(MonitorTypes, Monitors.monitor_type_id == MonitorTypes.monitor_type_id)
             .outerjoin(MonitorFunctions, Monitors.monitor_function_id == MonitorFunctions.monitor_function_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
         )
+
+    result = (
+        result
+        .filter(Devices.serial_number == serial_number)
+        .first()
+    )
         
-    else:
-        result = (
-            db.query(
-                Devices,
-                SystemStatus.status_description,
-                Parishes.parish_name,
-                LocationTypes.ltype_name,
-                Locations.location_name,
-                Divisions.division_name,
-                Branches.branch_name,
-                Clients,
-            )
-            .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
-            .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
-            .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
-            .outerjoin(Locations, Devices.location_id == Locations.location_id)
-            .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
-            .outerjoin(Branches, Devices.branch_id == Branches.branch_id) 
-            .outerjoin(Clients, Devices.client_id == Clients.client_id)
-            .filter(Devices.serial_number == serial_number)
-            .first()
-        )
 
     if result:
-        if (category == "Laptop"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, laptop = result
 
-        elif (category == "Desktop"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, form_factor, desktop = result
+        # Unpack common device information
+        device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, workbench_name, *extra = result
 
-        elif (category == "Server"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, cpu_type, form_factor, raid_type, server = result
+        # Unpack category-specific information
+        if category == "Laptop":
+            cpu_type, laptop = extra
+
+        elif category == "Desktop":
+            cpu_type, form_factor, desktop = extra
+
+        elif category == "Server":
+            cpu_type, form_factor, raid_type, server = extra
 
         elif category == "Tablet":
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, tablet, bag, adapter, bag_type, bag_fabric_type = result
+            tablet, bag, adapter, bag_type, bag_fabric_type, bag_status, adapter_status = extra
 
-        elif (category == "Mouse") or (category == "Keyboard"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, mouse_keyboard = result
+        elif category in ("Mouse", "Keyboard"):
+            connection_type, mouse_keyboard = extra
 
-        elif (category == "Scanner"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, scanner = result
-        
-        elif (category == "Surge Protector"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, surge_protector = result
+        elif category == "Scanner":
+            connection_type, scanner = extra
 
-        elif (category == "UPS"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, ups = result
+        elif category == "Surge Protector":
+            surge_protector, = extra
 
-        elif (category == "Speaker"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, speaker_type, speaker = result
+        elif category == "UPS":
+            ups, = extra
 
-        elif (category == "Other Equipment"):
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, other_equipment = result
+        elif category == "Speaker":
+            speaker_type, speaker = extra
+
+        elif category == "Other Equipment":
+            other_equipment, = extra
 
         elif category == "Printer":
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, connection_type, printer_feature, printer = result
+            connection_type, printer_feature, printer = extra
 
         elif category == "CRAV":
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, meeting_room, equipment_type, crav = result
+            meeting_room, equipment_type, crav = extra
 
         elif category == "Network Switch":
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, network_switch = result
+            network_switch, = extra
 
         elif category == "Monitor":
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, monitor_types, monitor_functions, monitor = result
+            monitor_types, monitor_functions, monitor = extra
 
-        else:
-            device, status_description, parish_name, ltype_name, location_name, division_name, branch_name, client, location = result
-
+    # Continue with your existing device_item code...
         device_item = {
             "devices_id": device.devices_id,
             "category": device.category,
@@ -2375,15 +3139,21 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
             "client_name": client.firstname + " " + client.lastname if client else None,
             "added_by": device.added_by,
             "last_updated_by": device.last_updated_by,
+            "last_updated_date": device.last_updated_date,
             "repaired_date": device.repaired_date,
             "bos_date": device.bos_date,
             "bos_by": device.bos_by,
             "deployed_by": device.deployed_by,
             "return_date": device.return_date,
-            "assigned_on": device.assigned_on,
-            "unassigned_on": device.unassigned_on,
             "supplier_name": device.supplier_name,
             "device_cost": device.device_cost,
+            "workbench_id": device.workbench_id,
+            "workbench_name": workbench_name if workbench_name else None,
+            "verification": device.verification,
+            "verified_by": device.verified_by,
+            "pending_delete": device.pending_delete,
+            "pending_delete_by": device.pending_delete_by,
+            
         }
 
         if (category == "Laptop"):
@@ -2458,17 +3228,25 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "version": tablet.version,
                 "device_size": tablet.device_size,
 
+                "bag_exists": True if bag else None,
                 "bag_id": bag.bag_id if bag else None,
+                "bag_status_id": bag.bag_status_id if bag else None,
+                "bag_status": bag_status if bag_status else None,
                 "bag_brand": bag.bag_brand if bag else None,
                 "bag_model": bag.bag_model if bag else None,
                 "bag_ministry_number": bag.bag_ministry_number if bag else None,
                 "bag_delivery_date": bag.bag_delivery_date if bag else None,
                 "bag_assignment_date": bag.bag_assignment_date if bag else None,
                 "bag_bos_date": bag.bag_bos_date if bag else None,
+                "bag_type_id": bag_type.bag_type_id if bag_type else None,
                 "bag_type": bag_type.bag_type_description if bag_type else None,
+                "bag_fabric_type_id": bag_fabric_type.bag_fabric_type_id if bag_fabric_type else None,
                 "bag_fabric_type": bag_fabric_type.bag_fabric_type_description if bag_fabric_type else None,
 
+                "adapter_exists": True if adapter else None,
                 "adapter_id": adapter.adapter_id if adapter else None,
+                "adapter_status_id": adapter.adapter_status_id if adapter else None,
+                "adapter_status": adapter_status if adapter_status else None,
                 "adapter_serial_number": adapter.adapter_serial_number if adapter else None,
                 "adapter_brand": adapter.adapter_brand if adapter else None,
                 "adapter_model": adapter.adapter_model if adapter else None,
@@ -2480,7 +3258,7 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
 
         elif (category == "Mouse") or (category == "Keyboard") or (category == "Scanner"):
             device_item.update({
-                "connection_type": connection_type.ctype_description
+                "connection_type": connection_type.ctype_description if connection_type else None
             })
 
         elif (category == "Surge Protector"):
@@ -2496,7 +3274,7 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
         elif (category == "Speaker"):
             device_item.update({
                 "number_of_speakers": speaker.number_of_speakers,
-                "speaker_type": speaker_type.speaker_type_description
+                "speaker_type": speaker_type.speaker_type_description if speaker_type else None
             })
 
         elif (category == "Other Equipment"):
@@ -2507,8 +3285,8 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
         elif (category == "Printer"):
             device_item.update({
                 "ip_address": printer.ip_address,
-                "feature": printer_feature.feature_description,
-                "connection_type": connection_type.ctype_description,
+                "feature": printer_feature.feature_description if printer_feature else None,
+                "connection_type": connection_type.ctype_description if connection_type else None,
             })
 
         elif (category == "CRAV"):
@@ -2516,8 +3294,8 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "name": crav.name,
                 "ip_address": crav.ip_address,
                 "mac_address": crav.mac_address,
-                "meeting_room": meeting_room.meeting_room_description,
-                "equipment_type": equipment_type.crav_equipment_type_description,
+                "meeting_room": meeting_room.meeting_room_description if meeting_room else None,
+                "equipment_type": equipment_type.crav_equipment_type_description if equipment_type else None,
             })
 
         elif (category == "Network Switch"):
@@ -2539,14 +3317,16 @@ def get_item_sn_view(serial_number: str, category: str, db: Session=Depends(get_
                 "warranty_end_date": monitor.warranty_end_date,                
                 "manufactured_date": monitor.manufactured_date,
                 "monitor_size": monitor.monitor_size,
-                "monitor_type": monitor_types.monitor_type_description,
-                "monitor_function": monitor_functions.monitor_function_description
+                "monitor_type": monitor_types.monitor_type_description if monitor_types else None,
+                "monitor_function": monitor_functions.monitor_function_description if monitor_functions else None
             })
         
         return device_item
     
     else:
         return {"message": "Category not supported"}
+
+
 
 @app.get('/get-clients/')
 def get_client_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
@@ -2622,6 +3402,83 @@ def get_client_view(current_user: user_dependency, firstname: str, lastname: str
 @app.get('/get-roles/')
 def get_roles_view(current_user: user_dependency, db: Session=Depends(get_db)):
     return db.query(Roles).all()
+
+@app.get('/get-workbenches/')
+def get_workbenches_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+            Workbenches, 
+            Clients.firstname,
+            Clients.lastname
+        )
+        .outerjoin(Clients, Workbenches.client_id == Clients.client_id)
+    )
+
+    if name:
+        search = f"%{name.strip()}%"
+        rows = query.filter((Workbenches.workbench_name).ilike(search)).all()
+
+    else:
+        rows = query.all()
+
+    result_list = []
+
+    for row in rows:
+        print(row.firstname)
+        workbench = row[0]
+
+        workbench_data = {
+            "workbench_id": workbench.workbench_id,
+            "workbench_name": workbench.workbench_name,
+            "client_name": (f"{row.firstname} {row.lastname}" if row.firstname is not None and row.lastname is not None else "No Client"),
+            "date_created": workbench.date_created,
+            "added_by": workbench.added_by,
+            
+        }
+
+        result_list.append(workbench_data)
+
+    return result_list
+
+@app.get('/get-workbench-devices/')
+def get_workbench_devices_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
+
+    query = (
+        db.query(
+            Workbenches, 
+            Clients.firstname,
+            Clients.lastname
+        )
+        .outerjoin(Clients, Workbenches.client_id == Clients.client_id)
+    )
+
+    if name:
+        search = f"%{name.strip()}%"
+        rows = query.filter((Workbenches.workbench_name).ilike(search)).all()
+
+    else:
+        rows = query.all()
+
+    result_list = []
+
+    for row in rows:
+        print(row.firstname)
+        workbench = row[0]
+
+        workbench_data = {
+            "workbench_id": workbench.workbench_id,
+            "workbench_name": workbench.workbench_name,
+            "client_name": (f"{row.firstname} {row.lastname}" if row.firstname is not None and row.lastname is not None else "No Client"),
+            "date_created": workbench.date_created,
+            "added_by": workbench.added_by,
+            
+        }
+
+        result_list.append(workbench_data)
+
+    return result_list
+
 
 @app.get('/get-users/')
 def get_client_view(current_user: user_dependency, name: Optional[str] = None, db: Session=Depends(get_db)):
@@ -2961,6 +3818,9 @@ def get_items_delivery_date_view(delivery_date: date, current_user: user_depende
 
 
 
+
+
+
 ######################### SECTION FOR DELETING INFORMATION #######################################
 @app.delete('/delete-item/')
 def delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
@@ -2968,11 +3828,20 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
 
     if not deleted:
         raise HTTPException(status_code=404, detail="Device not found")
+
+    else:
+        if current_user.role_id == 1 or current_user.role_id == 2:
+            db.delete(deleted)
+            db.commit()
+            return {"message": "Device has been deleted"}
+
+        else:
+            return {"message": "Not Authorized To Confirm Delete"}
+        
     
-    db.delete(deleted)
-    db.commit()
     
-    return {"message": "Device has been deleted"}
+
+
 
 @app.delete('/delete-client/')
 def delete_client_view(email: str, current_user: user_dependency, db: Session=Depends(get_db)):
@@ -2985,6 +3854,26 @@ def delete_client_view(email: str, current_user: user_dependency, db: Session=De
         return {"message": "Client has been deleted"}
     else:
         return "Client Not Found"
+
+@app.delete('/delete-user/')
+def delete_user_view(first_name: str, last_name: str, email: str, current_user: user_dependency, db: Session=Depends(get_db)):
+    deleted = db.query(Users).filter(Users.firstname == first_name, Users.lastname == last_name, Users.email == email).delete()
+    db.commit()
+
+    if deleted == 0:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {"message": "User has been deleted"}
+
+@app.delete('/delete-workbench/')
+def delete_workbench_view(workbench_name: str, current_user: user_dependency, db: Session=Depends(get_db)):
+    deleted = db.query(Workbenches).filter(Workbenches.workbench_name == workbench_name).delete()
+    db.commit()
+
+    if deleted == 0:
+        return {"message": "Workbench not found"}
+    
+    return {"message": "Workbench has been deleted"}
 
 @app.delete("/delete-status/")
 def delete_status_view(
@@ -3127,13 +4016,23 @@ def delete_bag_fabric_type_view(bag_fabric_type: str, current_user: user_depende
 
 @app.delete('/delete-comment/')
 def delete_comments_view(current_user: user_dependency, id: int, db: Session=Depends(get_db)):
-    deleted = db.query(Comments).filter(Comments.comment_id == id).delete()
-    db.commit()
 
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="Device not found")
-    
-    return {"message": "comment has been deleted"}
+    deleted = db.query(Comments).filter(Comments.comment_id == id).first()
+
+    if deleted is None:
+        return {"message": "Device Not Found"}
+
+    if deleted.added_by != current_user.firstname + " " + current_user.lastname:
+        return {"message": "You did not create this comment"}
+
+    else:
+        db.delete(deleted)
+
+        db.commit()
+        
+        return {"message": "Comment has been deleted"}
+
+
 
 
 
@@ -3170,6 +4069,8 @@ def assign_device_view(current_user: user_dependency, device_sn: str, client_id:
 @app.post('/unassign-item/')
 def delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
     device = db.query(Devices).filter(Devices.serial_number == serial_number).first()
+    workbench = db.query(Devices).outerjoin(Workbenches).filter(Devices.serial_number == serial_number, Devices.client_id == Workbenches.client_id).first()
+
 
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
@@ -3180,6 +4081,92 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
     device.last_updated_by = current_user.firstname + " " + current_user.lastname,
     device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
 
+    if workbench:
+        device.workbench_id = None
+
+    db.commit()
+
+    return {"message": "Device has been unassigned from the client"}
+
+
+@app.put('/assign-workbench/')
+def assign_workbench_view(current_user: user_dependency, workbench_name: str, client_id: int, db: Session=Depends(get_db)):
+    workbench = db.query(Workbenches).filter(Workbenches.workbench_name == workbench_name).first()
+    client = db.query(Clients).filter(Clients.client_id == client_id).first()
+    devices = db.query(Devices).filter(Devices.workbench_id == workbench.workbench_id).all()
+
+    if client:
+        if workbench:
+            workbench.client_id = client_id
+            workbench.deployment_date = datetime.now().strftime("%Y-%m-%d")
+            workbench.deployed_by = current_user.firstname + " " + current_user.lastname,
+            workbench.last_updated_by = current_user.firstname + " " + current_user.lastname,
+            workbench.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+
+            if devices:
+                for device in devices:
+                    device.client_id = client_id
+                    device.status_id = 6
+                    device.deployment_date = datetime.now().strftime("%Y-%m-%d")
+                    device.deployed_by = current_user.firstname + " " + current_user.lastname,
+                    device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+                    device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+
+
+            
+
+            db.commit()
+            db.refresh(workbench)
+            return {"message": "Workbench assigned successfully", "item_id": workbench.workbench_id, "client": client_id}
+        
+        else:
+            raise HTTPException(
+                status_code=404,
+                detail="Device not found"
+            )
+    else:
+        return {"message": "Client Not Found", "item_id": workbench.workbench_id, "client": client_id}
+
+@app.post('/unassign-workbench/')
+def unassign_workbench_view(current_user: user_dependency, workbench_id: int, db: Session=Depends(get_db)):
+    workbench = db.query(Workbenches).filter(Workbenches.workbench_id == workbench_id).first()
+    devices = db.query(Devices).filter(Devices.workbench_id == workbench_id).all()
+
+    if not workbench:
+        raise HTTPException(status_code=404, detail="Workbench not found")
+    
+    workbench.client_id = None
+    
+    workbench.last_updated_by = current_user.firstname + " " + current_user.lastname,
+    workbench.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+
+    for device in devices:
+        device.return_date = datetime.now().strftime("%Y-%m-%d")
+        device.client_id = None
+        device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+        device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+        device.status_id = 3
+    
+    db.commit()
+
+    return {"message": "Device has been unassigned from the client"}
+
+
+@app.post('/unassign-all-client-devices/')
+def unassign_all_client_devices_view(current_user: user_dependency, client_id: int, db: Session=Depends(get_db)):
+    
+    devices = db.query(Devices).filter(Devices.client_id == client_id).all()
+
+    if not devices:
+        raise HTTPException(status_code=404, detail="Devices not found")
+
+    for device in devices:
+        device.return_date = datetime.now().strftime("%Y-%m-%d")
+        device.client_id = None
+        device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+        device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+        device.status_id = 3
+    
     db.commit()
 
     return {"message": "Device has been unassigned from the client"}
@@ -3269,28 +4256,25 @@ def filter_devices(
 ):
     query = (
         db.query(
-            Devices.devices_id,
-            Devices.category,
-            Devices.brand,
-            Devices.model,
-            Devices.serial_number,
-            Devices.inventory_number,
-            Devices.delivery_date,
-            Devices.deployment_date,
+            Devices,
             Clients.firstname,
             Clients.lastname,
             SystemStatus.status_description,
+            LocationTypes.ltype_name,
             Locations.location_name,
             Parishes.parish_name,
             Divisions.division_name,
             Branches.branch_name,
+            Workbenches.workbench_name
         )
         .outerjoin(Clients, Devices.client_id == Clients.client_id)
         .outerjoin(SystemStatus, Devices.status_id == SystemStatus.status_id)
         .outerjoin(Parishes, Devices.parish_id == Parishes.parish_id)
+        .outerjoin(LocationTypes, Devices.ltype_id == LocationTypes.ltype_id)
         .outerjoin(Locations, Devices.location_id == Locations.location_id)
         .outerjoin(Divisions, Devices.division_id == Divisions.division_id)
         .outerjoin(Branches, Devices.branch_id == Branches.branch_id)
+        .outerjoin(Workbenches, Devices.workbench_id == Workbenches.workbench_id)
         
     )
 
@@ -3373,42 +4357,73 @@ def filter_devices(
     # Filter by deployment year
     if returned_year is not None:
             query = query.filter(
-                extract("year", Devices.deployment_date) == deployment_year
+                extract("year", Devices.return_date) == returned_year
             )
 
     # Filter by deployment month
     if returned_month is not None:
         query = query.filter(
-            extract("month", Devices.deployment_date) == deployment_month
+            extract("month", Devices.return_date) == returned_month
         )
 
     # Filter by deployment quarter
     if returned_quarter is not None:
         query = query.filter(
-            extract("quarter", Devices.deployment_date) == deployment_quarter
+            extract("quarter", Devices.return_date) == returned_quarter
         )
 
     results = query.all()
 
-    return [
-        {
-            "devices_id": r.devices_id,
-            "category": r.category,
-            "brand": r.brand,
-            "model": r.model,
-            "serial_number": r.serial_number,
-            "inventory_number": r.inventory_number,
-            "delivery_date": r.delivery_date,
-            "deployment_date": r.deployment_date,
-            "client_name": f"{r.firstname} {r.lastname}" if r.firstname and r.lastname else None,
-            "status_description": r.status_description,
-            "location_name": r.location_name,
-            "parish_name": r.parish_name,
-            "division_name": r.division_name,
-            "branch_name": r.branch_name,
+    result_list = []
+
+    for device, firstname, lastname, status_description, ltype_name, location_name, parish_name, division_name, branch_name, workbench_name in results:
+
+        client_name = None
+
+        if firstname or lastname:
+            client_name = f"{firstname or ''} {lastname or ''}".strip()
+
+        item = {
+            "devices_id": device.devices_id,
+            "category": device.category,
+            "brand": device.brand,
+            "model": device.model,
+            "serial_number": device.serial_number,
+            "inventory_number": device.inventory_number,
+            "delivery_date": device.delivery_date,
+            "deployment_date": device.deployment_date,
+            "deployed_by": device.deployed_by,
+            "bos_date": device.bos_date,
+            "bos_by": device.bos_by,
+            "supplier_name": device.supplier_name,
+            "device_cost": device.device_cost,
+            "added_by": device.added_by,
+            "last_updated_by": device.last_updated_by,
+            "last_updated_date": device.last_updated_date,
+            "repaired_date": device.repaired_date,
+            "repaired_by": device.repaired_by,
+
+            "return_date": device.return_date,
+            "client_name": client_name,
+            "status_description": status_description,
+            "ltype_name": ltype_name,
+            "location_name": location_name,
+            "parish_name": parish_name,
+            "division_name": division_name,
+            "branch_name": branch_name,
+            "workbench_name": workbench_name,
+            "verification": device.verification,
+            "verified_by": device.verified_by,
+            "pending_delete": device.pending_delete,
+            "pending_delete_by": device.pending_delete_by,
         }
-        for r in results
-    ]
+
+        result_list.append(item)
+
+        for item in result_list:
+            print(item)
+
+    return result_list
 
 @app.get("/filter-delivery-date/")
 def filter_delivery_date(
@@ -3539,13 +4554,23 @@ async def update_status(status_box: UpdateStatusRequest, current_user: user_depe
 @app.post("/update-device/")
 async def update_device(new_device: UpdatePackage, current_user: user_dependency, db: Session=Depends(get_db)):
     device = db.query(Devices).filter(Devices.serial_number == new_device.serial_number).first()
+
+    device2 = None
+    bag = None
+    adapter = None
+
     if not device:
         raise HTTPException(status_code=404, detail="Device not found")
 
     update_data = new_device.dict(exclude_unset=True)
 
+    print(update_data)
+
+    if device.status_id == 6 and update_data.get("status_id") != 6:
+        device.client_id = None
+
     for field, value in update_data.items():
-        if hasattr(device, field) and value is not None:
+        if hasattr(device, field):
             setattr(device, field, value)
     
 
@@ -3563,6 +4588,10 @@ async def update_device(new_device: UpdatePackage, current_user: user_dependency
 
     elif device.category == "Tablet":
         device2 = db.query(Tablets).filter(Tablets.devices_id == device.devices_id).first()
+        
+        bag = db.query(Bags).filter(Bags.devices_id == device.devices_id).first()
+
+        adapter = db.query(Adapters).filter(Adapters.devices_id == device.devices_id).first()
 
     elif device.category == "Mouse" or device.category == "Keyboard":
         device2 = db.query(MouseKeyboards).filter(MouseKeyboards.devices_id == device.devices_id).first()
@@ -3596,8 +4625,35 @@ async def update_device(new_device: UpdatePackage, current_user: user_dependency
 
     if device2:
         for field, value in update_data.items():
-            if hasattr(device2, field) and value is not None:
+            if hasattr(device2, field):
                 setattr(device2, field, value)
+
+    if bag:
+        for field, value in update_data.items():
+            if hasattr(bag, field):
+                setattr(bag, field, value)
+
+    if adapter:
+            for field, value in update_data.items():
+                if hasattr(adapter, field):
+                    setattr(adapter, field, value)
+
+    
+
+    # If the device status is changed to 5, record the current date and time
+    if update_data.get("status_id") == 5:
+        device.bos_date = datetime.now(timezone.utc)
+        device.bos_by = current_user.firstname + " " + current_user.lastname
+
+    if update_data.get("workbench_id") is not None:
+        device.client_id = None
+
+
+    device.last_updated_by = current_user.firstname + " " + current_user.lastname
+    device.last_updated_date = datetime.now(timezone.utc)
+
+
+    
 
     db.commit()
     db.refresh(device)
@@ -3607,6 +4663,82 @@ async def update_device(new_device: UpdatePackage, current_user: user_dependency
     
     else:
         return device
+
+@app.delete('/remove-workbench-item/')
+def remove_workbench_item_view(current_user: user_dependency, serial_number: str, workbench_id: int, db: Session=Depends(get_db)):
+    device = db.query(Devices).filter(Devices.serial_number == serial_number).first()
+
+    if not device:
+        return {"message": "Device not found"}
+
+    try:
+        device.workbench_id = None
+
+        db.commit()
+
+        return {"message": "Device removed from workbench successfully"}
+
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(
+            status_code=400,
+            detail=str(e)
+        )
+
+@app.post('/verify-item/')
+def verify_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
+    verify = db.query(Devices).filter(Devices.serial_number == serial_number).first()
+
+    if not verify:
+        return {"message": "Device Not Found"}
     
+    else:
+        initial_user = verify.added_by
+        verifying_user = current_user.firstname + " " + current_user.lastname
+
+        if (initial_user != verifying_user) and (current_user.role_id >= 3):
+            verify.verification = True
+            verify.verified_by = verifying_user
+            db.commit()
+
+            return {"message": "Device has been Verified"}
+
+        else:
+            return {"message": "Cannot be verified by the same user"}
+
+    
+@app.post('/request-delete-item/')
+def request_delete_item_view(current_user: user_dependency, serial_number: str, db: Session=Depends(get_db)):
+    deleted = db.query(Devices).filter(Devices.serial_number == serial_number).first()
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Device not found")
+    
+    else:
+        deleted.pending_delete = True
+        deleted.pending_delete_by = current_user.firstname + " " + current_user.lastname,
+    
+    db.commit()
+    
+    return {"message": "Device Delete has been requested"}
+
+@app.post('/request-serial-change/')
+def request_serial_change_view(current_user: user_dependency, current_serial_number: str, new_serial_number: str,  db: Session=Depends(get_db)):
+    change_serial = db.query(Devices).filter(Devices.serial_number == current_serial_number).first()
+
+    if not change_serial:
+        return {"message": "Device Not Found"}
+
+    if not new_serial_number or new_serial_number == "":
+        return {"message": "Enter A New Serial number"}
+    
+    else:
+        change_serial.pending_serial_change = new_serial_number
+        change_serial.pending_serial_change_by = current_user.firstname + " " + current_user.lastname,
+    
+    db.commit()
+    
+    return {"message": "Device serial number change has been requested"}
+
 
         

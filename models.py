@@ -49,6 +49,21 @@ class Clients(Base):
     added_by = Column(String(255), nullable=True)
 
 
+class Workbenches(Base):
+    __tablename__ = "workbenches"
+
+    workbench_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    workbench_name = Column(String(255), unique=True, nullable=True)
+    client_id = Column(Integer, ForeignKey("clients.client_id", ondelete="SET NULL"), nullable=True)
+    date_created = Column(Date, nullable=True)
+    added_by = Column(String(255), nullable=True)
+    deployment_date = Column(Date, nullable=True)
+    deployed_by = Column(String(255), nullable=True)
+    last_updated_date = Column(Date, nullable=True)
+    last_updated_by = Column(String(255), nullable=True)
+        
+
+
 class Devices(Base):
     __tablename__ = "devices"
 
@@ -70,6 +85,7 @@ class Devices(Base):
     ltype_id = Column(Integer, ForeignKey("location_type.ltype_id", ondelete="SET NULL"), nullable=True)
     branch_id = Column(Integer, ForeignKey("branch.branch_id", ondelete="SET NULL"), nullable=True)
     client_id = Column(Integer, ForeignKey("clients.client_id", ondelete="SET NULL"), nullable=True)
+    workbench_id = Column(Integer, ForeignKey("workbenches.workbench_id", ondelete="SET NULL"), nullable=True)
     added_by = Column(String(255), nullable=True)
     last_updated_by = Column(String(255), nullable=True)
     last_updated_date = Column(Date, nullable=True)
@@ -78,6 +94,12 @@ class Devices(Base):
     bos_by = Column(String(255), nullable=True)
     deployed_by = Column(String(255), nullable=True)
     return_date = Column(Date, nullable=True)
+    verification = Column(Boolean, nullable=True, default=False)
+    verified_by = Column(String(255), nullable=True)
+    pending_delete = Column(Boolean, nullable=True, default=False)
+    pending_delete_by = Column(String(255), nullable=True)
+    pending_serial_change = Column(String(255), nullable=True)
+    pending_serial_change_by = Column(String(255), nullable=True)
 
 class DeviceFiles(Base):
     __tablename__ = "device_files"
@@ -181,6 +203,8 @@ class Comments(Base):
         server_default=text("DATE_TRUNC('second', TIMEZONE('America/Jamaica', CURRENT_TIMESTAMP))"), 
         nullable=False
     )
+
+    added_by = Column(String(255), nullable=True)
 
 
 
@@ -304,7 +328,7 @@ class MouseKeyboards(Base):
     __tablename__ = "mouse_keyboard"
 
     mouse_keyboard_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    connection_type_id = Column(Integer, ForeignKey("connection_type.ctype_id", ondelete="SET NULL"), nullable=False)
+    connection_type_id = Column(Integer, ForeignKey("connection_type.ctype_id", ondelete="SET NULL"), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
 class Scanners(Base):
@@ -525,61 +549,8 @@ class DeviceRequest(BaseModel):
 
     comment: Optional[str] = None
 
-    @classmethod
-    def as_form(
+    workbench_id: Optional[int] = None
 
-        cls,
-
-        category: Optional[str] = Form(None),
-        brand: Optional[str] = Form(None),
-        model: Optional[str] = Form(None),
-
-        serial_number: Optional[str] = Form(None),
-        inventory_number: Optional[str] = Form(None),
-
-        delivery_date: Optional[date] = Form(None),
-        deployment_date: Optional[date] = Form(None),
-        bos_date: Optional[date] = Form(None),
-
-        supplier_name: Optional[str] = Form(None),
-        device_cost: Optional[int] = Form(None),
-
-        status_id: Optional[int] = Form(None),
-        division_id: Optional[int] = Form(None),
-        parish_id: Optional[int] = Form(None),
-        ltype_id: Optional[int] = Form(None),
-        location_id: Optional[int] = Form(None),
-        branch_id: Optional[int] = Form(None),
-
-        comment: Optional[str] = Form(None)
-
-    ):
-
-        return cls(
-
-            category=category,
-            brand=brand,
-            model=model,
-
-            serial_number=serial_number,
-            inventory_number=inventory_number,
-
-            delivery_date=delivery_date,
-            deployment_date=deployment_date,
-            bos_date=bos_date,
-
-            supplier_name=supplier_name,
-            device_cost=device_cost,
-
-            status_id=status_id,
-            division_id=division_id,
-            location_id=location_id,
-            parish_id=parish_id,
-            ltype_id=ltype_id,
-            branch_id=branch_id,
-
-            comment=comment
-        )
 
 class LaptopRequest(DeviceRequest):
     hard_disk_capacity: str | None = None
@@ -1012,10 +983,35 @@ class UpdatePackage(BaseModel):
     size: Optional[str]
     monitor_type_id: Optional[int]
     monitor_function_id: Optional[int]
-    
 
+    bag_exists: Optional[bool] = None
+    bag_type_id: Optional[int]
+    bag_brand: Optional[str] 
+    bag_model: Optional[str] 
+    bag_ministry_number: Optional[str] 
+    bag_fabric_type_id: Optional[int] 
+    bag_delivery_date: Optional[date]
+    bag_assignment_date: Optional[date]
+    bag_status_id: Optional[int]
+    bag_bos_date: Optional[date]
+
+    adapter_exists: Optional[bool] = None
+    adapter_serial_number: Optional[str]
+    adapter_brand: Optional[str]
+    adapter_model: Optional[str] 
+    adapter_ministry_number: Optional[str]
+    adapter_delivery_date: Optional[date]
+    adapter_assignment_date: Optional[date]
+    adapter_status_id: Optional[int]
+    adapter_bos_date: Optional[date]
+    
+    parish_id: Optional[int]
+    ltype_id: Optional[int]
     location_id: Optional[int]
     division_id: Optional[int]
+    branch_id: Optional[int]
+
+    workbench_id: Optional[int]
 
 
 
