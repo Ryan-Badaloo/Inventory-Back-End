@@ -1,8 +1,8 @@
-"""update db
+"""init
 
-Revision ID: f9312c0b3924
+Revision ID: 83364866da43
 Revises: 
-Create Date: 2026-10-29 09:56:55.066834
+Create Date: 2026-11-11 17:37:02.121267
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f9312c0b3924'
+revision: str = '83364866da43'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -185,6 +185,21 @@ def upgrade() -> None:
     sa.UniqueConstraint('email')
     )
     op.create_index(op.f('ix_clients_client_id'), 'clients', ['client_id'], unique=False)
+    op.create_table('workbenches',
+    sa.Column('workbench_id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('workbench_name', sa.String(length=255), nullable=True),
+    sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('date_created', sa.Date(), nullable=True),
+    sa.Column('added_by', sa.String(length=255), nullable=True),
+    sa.Column('deployment_date', sa.Date(), nullable=True),
+    sa.Column('deployed_by', sa.String(length=255), nullable=True),
+    sa.Column('last_updated_date', sa.Date(), nullable=True),
+    sa.Column('last_updated_by', sa.String(length=255), nullable=True),
+    sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ondelete='SET NULL'),
+    sa.PrimaryKeyConstraint('workbench_id'),
+    sa.UniqueConstraint('workbench_name')
+    )
+    op.create_index(op.f('ix_workbenches_workbench_id'), 'workbenches', ['workbench_id'], unique=False)
     op.create_table('devices',
     sa.Column('devices_id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('category', sa.String(length=255), nullable=True),
@@ -204,6 +219,7 @@ def upgrade() -> None:
     sa.Column('ltype_id', sa.Integer(), nullable=True),
     sa.Column('branch_id', sa.Integer(), nullable=True),
     sa.Column('client_id', sa.Integer(), nullable=True),
+    sa.Column('workbench_id', sa.Integer(), nullable=True),
     sa.Column('added_by', sa.String(length=255), nullable=True),
     sa.Column('last_updated_by', sa.String(length=255), nullable=True),
     sa.Column('last_updated_date', sa.Date(), nullable=True),
@@ -212,6 +228,12 @@ def upgrade() -> None:
     sa.Column('bos_by', sa.String(length=255), nullable=True),
     sa.Column('deployed_by', sa.String(length=255), nullable=True),
     sa.Column('return_date', sa.Date(), nullable=True),
+    sa.Column('verification', sa.Boolean(), nullable=True),
+    sa.Column('verified_by', sa.String(length=255), nullable=True),
+    sa.Column('pending_delete', sa.Boolean(), nullable=True),
+    sa.Column('pending_delete_by', sa.String(length=255), nullable=True),
+    sa.Column('pending_serial_change', sa.String(length=255), nullable=True),
+    sa.Column('pending_serial_change_by', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['branch_id'], ['branch.branch_id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['client_id'], ['clients.client_id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['division_id'], ['division.division_id'], ondelete='SET NULL'),
@@ -219,6 +241,7 @@ def upgrade() -> None:
     sa.ForeignKeyConstraint(['ltype_id'], ['location_type.ltype_id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['parish_id'], ['parish.parish_id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['status_id'], ['system_status.status_id'], ondelete='SET NULL'),
+    sa.ForeignKeyConstraint(['workbench_id'], ['workbenches.workbench_id'], ondelete='SET NULL'),
     sa.PrimaryKeyConstraint('devices_id')
     )
     op.create_index(op.f('ix_devices_devices_id'), 'devices', ['devices_id'], unique=False)
@@ -262,6 +285,7 @@ def upgrade() -> None:
     sa.Column('devices_id', sa.Integer(), nullable=False),
     sa.Column('comment_value', sa.Text(), nullable=True),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("DATE_TRUNC('second', TIMEZONE('America/Jamaica', CURRENT_TIMESTAMP))"), nullable=False),
+    sa.Column('added_by', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['devices_id'], ['devices.devices_id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('comment_id')
     )
@@ -355,7 +379,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_monitor_monitor_id'), 'monitor', ['monitor_id'], unique=False)
     op.create_table('mouse_keyboard',
     sa.Column('mouse_keyboard_id', sa.Integer(), autoincrement=True, nullable=False),
-    sa.Column('connection_type_id', sa.Integer(), nullable=False),
+    sa.Column('connection_type_id', sa.Integer(), nullable=True),
     sa.Column('devices_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['connection_type_id'], ['connection_type.ctype_id'], ondelete='SET NULL'),
     sa.ForeignKeyConstraint(['devices_id'], ['devices.devices_id'], ondelete='CASCADE'),
@@ -521,6 +545,8 @@ def downgrade() -> None:
     op.drop_table('adapter')
     op.drop_index(op.f('ix_devices_devices_id'), table_name='devices')
     op.drop_table('devices')
+    op.drop_index(op.f('ix_workbenches_workbench_id'), table_name='workbenches')
+    op.drop_table('workbenches')
     op.drop_index(op.f('ix_clients_client_id'), table_name='clients')
     op.drop_table('clients')
     op.drop_index(op.f('ix_location_location_id'), table_name='location')

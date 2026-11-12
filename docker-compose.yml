@@ -1,15 +1,15 @@
 services:
-  db:
-    image: postgres:latest
-    container_name: computer_inventory_db_test
+  db-cis: 
+    image: postgres:alpine3.24
+    container_name: computer_inventory_db
     restart: always
-    ports:
-      - "5434:5432"
     environment:
-      POSTGRES_USER: computer_admin
-      POSTGRES_PASSWORD: Pass0rd1
+      POSTGRES_USER: ${CIS_DB_USER} 
+      POSTGRES_PASSWORD: ${CIS_DB_PASSWORD}
     volumes:
-      - computer_inventory_db_vol_test:/var/lib/postgresql/data
+      - com_inven_vol_new_2:/var/lib/postgresql
+    networks:
+      - computer_invertory_network
 
 volumes:
-  computer_inventory_db_vol_test:
+  com_inven_vol_new_2:

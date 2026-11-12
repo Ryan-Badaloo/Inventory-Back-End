@@ -1,4 +1,4 @@
-FROM python:3.12-alpine
+FROM python:3.13.18-alpine
 
 # Prevent Python from writing pyc files & enable unbuffered logs
 ENV PYTHONDONTWRITEBYTECODE=1
