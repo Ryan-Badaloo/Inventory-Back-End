@@ -1133,30 +1133,6 @@ async def read_users_me(current_user: user_dependency):
 
 
 ######################### SECTION FOR ADDING INFORMATION #######################################
-@app.post('/add-device/', response_model=DeviceRequest)
-def add_device_view(device: DeviceRequest, current_user: user_dependency, db: Session=Depends(get_db)):
-    try:
-        device_section = Devices(
-            category = device.category,
-            brand = device.brand,
-            model = device.model,
-            serial_number = device.serial_number,
-            inventory_number = device.inventory_number,
-            delivery_date = device.delivery_date,
-            deployment_date = device.deployment_date,
-            return_date = device.return_date,
-            status_id = device.status_id,
-            division_id = device.division_id,
-            added_by = current_user.firstname + " " + current_user.lastname,
-        )
-
-        db.add(device_section)
-        db.commit()
-        db.refresh(device_section)
-        return {"message": "Device Has Been Added"}
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
 
 @app.post('/add-workbench/')
 def add_workbench_view(current_user: user_dependency, workbench_name: str, client_id: Optional[int] = None,  db: Session=Depends(get_db)):
@@ -1187,72 +1163,95 @@ def add_workbench_view(current_user: user_dependency, workbench_name: str, clien
             raise HTTPException(status_code=400, detail=str(e))
 
             
+def add_device_view(device: DeviceRequest, current_user: user_dependency, db: Session):
+
+    serialExists = db.query(Devices).filter(Devices.serial_number == device.serial_number).first()
+
+    inventoryExists = None
+    if device.inventory_number != None:
+        inventoryExists = db.query(Devices).filter(Devices.inventory_number == device.inventory_number).first()
+    
+    if serialExists:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Serial Number Already Exists",
+                "error": "Serial Number Already Exists"
+            }
+        )
+
+    elif inventoryExists:
+        raise HTTPException(
+            status_code=400,
+            detail={
+                "message": "Inventory Number Already Exists",
+                "error": "Inventory Number Already Exists"
+            }
+        )  
+
+    else:
+        device_section = Devices(
+            category = device.category,
+            brand = device.brand,
+            model = device.model,
+            serial_number = device.serial_number,
+            inventory_number = device.inventory_number,
+            delivery_date = device.delivery_date,
+            deployment_date = device.deployment_date,
+            bos_date = device.bos_date,
+            return_date = device.return_date,
+            supplier_name = device.supplier_name,
+            device_cost = device.device_cost,
+            status_id = device.status_id,
+            parish_id = device.parish_id,
+            ltype_id = device.ltype_id,
+            division_id = device.division_id,
+            location_id = device.location_id,
+            branch_id = device.branch_id,
+            workbench_id = device.workbench_id,
+            added_by = current_user.firstname + " " + current_user.lastname,
+        )
+
+        db.add(device_section)
+        db.flush()
+
+        return device_section
 
 
 @app.post('/add-laptop/')
 def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Session=Depends(get_db)):
     try:
-        serialExists = db.query(Devices).filter(Devices.serial_number == laptop.serial_number).first()
-        inventoryExists = db.query(Devices).filter(Devices.inventory_number == laptop.inventory_number).first()
+        device_data = DeviceRequest(
+            **laptop.model_dump(include=DeviceRequest.model_fields.keys())
+        )
 
+        device_section = add_device_view(device_data, current_user, db)
 
-        if serialExists:
-            return "Serial Found"
-        elif inventoryExists:
-            return "Inventory Found"        
-        else:
-            device_section = Devices(
-                category = laptop.category,
-                brand = laptop.brand,
-                model = laptop.model,
-                serial_number = laptop.serial_number,
-                inventory_number = laptop.inventory_number,
-                delivery_date = laptop.delivery_date,
-                deployment_date = laptop.deployment_date,
-                bos_date = laptop.bos_date,
-                return_date = laptop.return_date,
-                supplier_name = laptop.supplier_name,
-                device_cost = laptop.device_cost,
-                status_id = laptop.status_id,
-                parish_id = laptop.parish_id,
-                ltype_id = laptop.ltype_id,
-                division_id = laptop.division_id,
-                location_id = laptop.location_id,
-                branch_id = laptop.branch_id,
-                workbench_id = laptop.workbench_id,
-                added_by = current_user.firstname + " " + current_user.lastname,
-            )
+        laptop_section = Laptops(
+            
+            
+            hard_disk_capacity = laptop.hard_disk_capacity,
+            memory_capacity = laptop.memory_capacity,
+            warranty_start_date = laptop.warranty_start_date,
+            warranty_end_date = laptop.warranty_end_date,
+            mac_address = laptop.mac_address,
+            manufactured_date = laptop.manufactured_date,
+            memory_type = laptop.memory_type,
+            operating_system = laptop.operating_system,
+            cpu_type_id = laptop.cpu_type_id,
+            processor_speed = laptop.processor_speed,
+            processor_type = laptop.processor_type,
+            computer_name = laptop.computer_name,
+            microsoft_office_version = laptop.microsoft_office_version,
+            antivirus = laptop.antivirus,
+            pdf_reader = laptop.pdf_reader,
+            
+            devices_id = device_section.devices_id,
+        )
 
-            print("Testing the Workbench", laptop.workbench_id)
+        db.add(laptop_section)
 
-
-            db.add(device_section)
-            db.flush()
-
-            laptop_section = Laptops(
-                
-                
-                hard_disk_capacity = laptop.hard_disk_capacity,
-                memory_capacity = laptop.memory_capacity,
-                warranty_start_date = laptop.warranty_start_date,
-                warranty_end_date = laptop.warranty_end_date,
-                mac_address = laptop.mac_address,
-                manufactured_date = laptop.manufactured_date,
-                memory_type = laptop.memory_type,
-                operating_system = laptop.operating_system,
-                cpu_type_id = laptop.cpu_type_id,
-                processor_speed = laptop.processor_speed,
-                processor_type = laptop.processor_type,
-                computer_name = laptop.computer_name,
-                microsoft_office_version = laptop.microsoft_office_version,
-                antivirus = laptop.antivirus,
-                pdf_reader = laptop.pdf_reader,
-                
-                devices_id = device_section.devices_id,
-            )
-
-            db.add(laptop_section)
-
+        if laptop.comment:
             comment_section = Comments(
                 devices_id = device_section.devices_id,
                 comment_value = laptop.comment,
@@ -1262,102 +1261,52 @@ def add_laptop_view(laptop: LaptopRequest, current_user: user_dependency, db: Se
 
             db.add(comment_section)
 
-            db.commit()
-            db.refresh(laptop_section)
-            return {"message": "Laptop Has Been Added"}
+        db.commit()
+        db.refresh(laptop_section)
+        return {"message": "Laptop Has Been Added"}
         
+    except HTTPException:
+        db.rollback()
+        raise
+
     except Exception as e:
         db.rollback()
-        raise HTTPException(status_code=400, detail=str(e))
+        print(f"Error adding Laptop: {e}")
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "An unexpected error occurred while adding the Laptop",
+                "error": str(e)
+            }
+        )
 
 @app.post('/add-desktop/')
 async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependency, db: Session = Depends(get_db)):
     try:
-        print(desktop.parish_id)
-        print(desktop.ltype_id)
-        print(desktop.branch_id)
-        serialExists = db.query(Devices).filter(Devices.serial_number == desktop.serial_number).first()
+        device_data = DeviceRequest(
+            **desktop.model_dump(include=DeviceRequest.model_fields.keys())
+        )
 
-        inventoryExists = db.query(Devices).filter(Devices.inventory_number == desktop.inventory_number).first()
-
-        if serialExists:
-
-            raise HTTPException(
-                status_code=400,
-                detail="Serial Number Already Exists"
-            )
-
-        elif inventoryExists:
-
-            raise HTTPException(
-                status_code=400,
-                detail="Inventory Number Already Exists"
-            )
-
-        else:
-            device_section = Devices(
-
-                category=desktop.category,
-                brand=desktop.brand,
-                model=desktop.model,
-
-                serial_number=desktop.serial_number,
-                inventory_number=desktop.inventory_number,
-
-                delivery_date=desktop.delivery_date,
-                deployment_date=desktop.deployment_date,
-                bos_date=desktop.bos_date,
-                return_date=desktop.return_date,
-
-                supplier_name=desktop.supplier_name,
-                device_cost=desktop.device_cost,
-
-                status_id=desktop.status_id,
-                parish_id = desktop.parish_id,
-                ltype_id = desktop.ltype_id,
-                division_id = desktop.division_id,
-                location_id = desktop.location_id,
-                branch_id = desktop.branch_id,
-                workbench_id = desktop.workbench_id,
-
-                added_by=current_user.firstname + " " + current_user.lastname,
-            )
-
-
-        db.add(device_section)
-
-        # Generates devices_id before commit
-        db.flush()
+        device_section = add_device_view(device_data, current_user, db)
 
         desktop_section = Desktops(
-
             hard_disk_capacity=desktop.hard_disk_capacity,
             memory_capacity=desktop.memory_capacity,
-
             warranty_start_date=desktop.warranty_start_date,
             warranty_end_date=desktop.warranty_end_date,
-
             mac_address=desktop.mac_address,
             manufactured_date=desktop.manufactured_date,
-
             memory_type=desktop.memory_type,
             operating_system=desktop.operating_system,
-
             cpu_type_id=desktop.cpu_type_id,
-
             processor_speed=desktop.processor_speed,
             processor_type=desktop.processor_type,
-
             computer_name=desktop.computer_name,
-
             microsoft_office_version=desktop.microsoft_office_version,
-
             antivirus=desktop.antivirus,
-
             form_factor_id=desktop.form_factor_id,
-
             pdf_reader=desktop.pdf_reader,
-
             devices_id=device_section.devices_id,
         )
 
@@ -1365,9 +1314,7 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
 
 
         if desktop.comment:
-
             comment_section = Comments(
-
                 devices_id=device_section.devices_id,
                 comment_value=desktop.comment,
                 created_at = datetime.now(),
@@ -1376,31 +1323,24 @@ async def add_desktop_view(desktop: DesktopRequest, current_user: user_dependenc
 
             db.add(comment_section)
 
-
         db.commit()
-
         db.refresh(desktop_section)
-
-        return {
-
-            "message": "Desktop Has Been Added",
-
-            "device_id": device_section.devices_id
-        }
+        return {"message": "Desktop Has Been Added"}
 
     except HTTPException:
-
         db.rollback()
-
         raise
-
+    
     except Exception as e:
-
         db.rollback()
-
+        print(f"Error adding Desktop: {e}")
+    
         raise HTTPException(
-            status_code=400,
-            detail=str(e)
+            status_code=500,
+            detail={
+                "message": "An unexpected error occurred while adding the Desktop",
+                "error": str(e)
+            }
         )
     
 @app.post('/add-server/')
@@ -2042,6 +1982,7 @@ def add_printer_view(printer: PrinterRequest, current_user: user_dependency, db:
             ip_address = printer.ip_address,
             feature_id = printer.feature_id,
             connection_type_id = printer.connection_type_id,
+            mac_address = printer.mac_address,
             devices_id = device_section.devices_id,
         )
 
@@ -2322,7 +2263,7 @@ async def add_client_view(client_model: CreateClientRequest, current_user: user_
     emailExists = db.query(Clients).filter(Clients.email == client_model.email).first()
 
     if nameExists or emailExists:
-        return "User Found"
+        return {"message": "Client Already Exists"}
     else:
         client = Clients(
                 firstname = client_model.firstname,
@@ -3855,13 +3796,16 @@ def delete_client_view(email: str, current_user: user_dependency, db: Session=De
         return "Client Not Found"
 
 @app.delete('/delete-user/')
-def delete_user_view(first_name: str, last_name: str, email: str, current_user: user_dependency, db: Session=Depends(get_db)):
-    deleted = db.query(Users).filter(Users.firstname == first_name, Users.lastname == last_name, Users.email == email).delete()
+def delete_user_view(email: str, current_user: user_dependency, db: Session=Depends(get_db)):
+    deleted = db.query(Users).filter(Users.email == email).first()
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    
+    db.delete(deleted)
     db.commit()
 
-    if deleted == 0:
-        raise HTTPException(status_code=404, detail="User not found")
-    
     return {"message": "User has been deleted"}
 
 @app.delete('/delete-workbench/')
@@ -4062,7 +4006,12 @@ def assign_device_view(current_user: user_dependency, device_sn: str, client_id:
                 detail="Device not found"
             )
     else:
-        return {"message": "Client Not Found", "item_id": device.devices_id, "client": client_id}
+        raise HTTPException(
+            status_code=404,
+            detail="Client not found"
+        )
+
+    
 
 
 @app.post('/unassign-item/')
@@ -4088,67 +4037,45 @@ def delete_item_view(current_user: user_dependency, serial_number: str, db: Sess
     return {"message": "Device has been unassigned from the client"}
 
 
-@app.put('/assign-workbench/')
-def assign_workbench_view(current_user: user_dependency, workbench_name: str, client_id: int, db: Session=Depends(get_db)):
-    workbench = db.query(Workbenches).filter(Workbenches.workbench_name == workbench_name).first()
-    client = db.query(Clients).filter(Clients.client_id == client_id).first()
-    devices = db.query(Devices).filter(Devices.workbench_id == workbench.workbench_id).all()
+# @app.put('/assign-workbench/')
+# def assign_workbench_view(current_user: user_dependency, workbench_name: str, client_id: int, db: Session=Depends(get_db)):
+#     workbench = db.query(Workbenches).filter(Workbenches.workbench_name == workbench_name).first()
+#     client = db.query(Clients).filter(Clients.client_id == client_id).first()
+#     devices = db.query(Devices).filter(Devices.workbench_id == workbench.workbench_id).all()
 
-    if client:
-        if workbench:
-            workbench.client_id = client_id
-            workbench.deployment_date = datetime.now().strftime("%Y-%m-%d")
-            workbench.deployed_by = current_user.firstname + " " + current_user.lastname,
-            workbench.last_updated_by = current_user.firstname + " " + current_user.lastname,
-            workbench.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+#     if client:
+#         if workbench:
+#             workbench.client_id = client_id
+#             workbench.deployment_date = datetime.now().strftime("%Y-%m-%d")
+#             workbench.deployed_by = current_user.firstname + " " + current_user.lastname,
+#             workbench.last_updated_by = current_user.firstname + " " + current_user.lastname,
+#             workbench.last_updated_date = datetime.now().strftime("%Y-%m-%d")
 
-            if devices:
-                for device in devices:
-                    device.client_id = client_id
-                    device.status_id = 6
-                    device.deployment_date = datetime.now().strftime("%Y-%m-%d")
-                    device.deployed_by = current_user.firstname + " " + current_user.lastname,
-                    device.last_updated_by = current_user.firstname + " " + current_user.lastname,
-                    device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
+#             if devices:
+#                 for device in devices:
+#                     device.client_id = client_id
+#                     device.status_id = 6
+#                     device.deployment_date = datetime.now().strftime("%Y-%m-%d")
+#                     device.deployed_by = current_user.firstname + " " + current_user.lastname,
+#                     device.last_updated_by = current_user.firstname + " " + current_user.lastname,
+#                     device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
 
 
             
 
-            db.commit()
-            db.refresh(workbench)
-            return {"message": "Workbench assigned successfully", "item_id": workbench.workbench_id, "client": client_id}
+#             db.commit()
+#             db.refresh(workbench)
+#             return {"message": "Workbench assigned successfully", "item_id": workbench.workbench_id, "client": client_id}
         
-        else:
-            raise HTTPException(
-                status_code=404,
-                detail="Device not found"
-            )
-    else:
-        return {"message": "Client Not Found", "item_id": workbench.workbench_id, "client": client_id}
+#         else:
+#             raise HTTPException(
+#                 status_code=404,
+#                 detail="Device not found"
+#             )
+#     else:
+#         return {"message": "Client Not Found", "item_id": workbench.workbench_id, "client": client_id}
 
-@app.post('/unassign-workbench/')
-def unassign_workbench_view(current_user: user_dependency, workbench_id: int, db: Session=Depends(get_db)):
-    workbench = db.query(Workbenches).filter(Workbenches.workbench_id == workbench_id).first()
-    devices = db.query(Devices).filter(Devices.workbench_id == workbench_id).all()
-
-    if not workbench:
-        raise HTTPException(status_code=404, detail="Workbench not found")
-    
-    workbench.client_id = None
-    
-    workbench.last_updated_by = current_user.firstname + " " + current_user.lastname,
-    workbench.last_updated_date = datetime.now().strftime("%Y-%m-%d")
-
-    for device in devices:
-        device.return_date = datetime.now().strftime("%Y-%m-%d")
-        device.client_id = None
-        device.last_updated_by = current_user.firstname + " " + current_user.lastname,
-        device.last_updated_date = datetime.now().strftime("%Y-%m-%d")
-        device.status_id = 3
-    
-    db.commit()
-
-    return {"message": "Device has been unassigned from the client"}
+# 
 
 
 @app.post('/unassign-all-client-devices/')

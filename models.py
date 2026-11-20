@@ -71,7 +71,7 @@ class Devices(Base):
     category = Column(String(255), nullable=True)
     brand = Column(String(255), nullable=True)
     model = Column(String(255), nullable=True)
-    serial_number = Column(String(255), nullable=True)
+    serial_number = Column(String(255), unique=True, nullable=True)
     inventory_number = Column(String(255), nullable=True)
     delivery_date = Column(Date, nullable=True)
     deployment_date = Column(Date, nullable=True)
@@ -109,12 +109,12 @@ class DeviceFiles(Base):
     devices_id = Column(
         Integer,
         ForeignKey("devices.devices_id", ondelete="CASCADE"),
-        nullable=False
+        nullable=True
     )
 
-    file_name = Column(String(255), nullable=False)
+    file_name = Column(String(255), nullable=True)
 
-    file_path = Column(String(500), nullable=False)
+    file_path = Column(String(500), nullable=True)
 
     uploaded_at = Column(DateTime, default=datetime.utcnow)
     
@@ -195,13 +195,13 @@ class Comments(Base):
     __tablename__ = "comments"
 
     comment_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=False)
+    devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
     comment_value = Column(Text)
 
     created_at = Column(
         DateTime, 
         server_default=text("DATE_TRUNC('second', TIMEZONE('America/Jamaica', CURRENT_TIMESTAMP))"), 
-        nullable=False
+        nullable=True
     )
 
     added_by = Column(String(255), nullable=True)
@@ -337,28 +337,28 @@ class Scanners(Base):
     scanner_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     mac_address = Column(String(255), nullable=True)
     ip_address = Column(String(255), nullable=True)
-    connection_type_id = Column(Integer, nullable=False)
+    connection_type_id = Column(Integer, nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
 class SurgeProtectors(Base):
     __tablename__ = "surge_protector"
 
     surge_protector_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    number_of_outlets = Column(Integer, nullable=False)
+    number_of_outlets = Column(Integer, nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
 class UPS(Base):
     __tablename__ = "ups"
 
     ups_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    number_of_outlets = Column(Integer, nullable=False)
+    number_of_outlets = Column(Integer, nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
 class Speakers(Base):
     __tablename__ = "speaker"
 
     speaker_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    number_of_speakers = Column(Integer, nullable=False)
+    number_of_speakers = Column(Integer, nullable=True)
     speaker_type_id = Column(Integer, ForeignKey("speaker_type.speaker_type_id", ondelete="SET NULL"), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
 
@@ -377,6 +377,7 @@ class Printers(Base):
     ip_address = Column(String(255), nullable=True)
     feature_id = Column(Integer, nullable=True)
     connection_type_id = Column(Integer, nullable=True)
+    mac_address = Column(String(255), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"))
 
     device = relationship("Devices", backref="printer", uselist=False)
@@ -448,7 +449,7 @@ class Divisions(Base):
     __tablename__ = "division"
 
     division_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    division_name = Column(String(255), nullable=False)
+    division_name = Column(String(255), nullable=True)
     added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
 
@@ -456,7 +457,7 @@ class Branches(Base):
     __tablename__ = "branch"
 
     branch_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    branch_name = Column(String(255), nullable=False)
+    branch_name = Column(String(255), nullable=True)
     division_id = Column(Integer, ForeignKey("division.division_id", ondelete="CASCADE"))
     added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
@@ -465,7 +466,7 @@ class Locations(Base):
     __tablename__ = "location"
 
     location_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    location_name = Column(String(255), nullable=False)
+    location_name = Column(String(255), nullable=True)
     parish_id = Column(Integer, ForeignKey("parish.parish_id", ondelete="CASCADE"))
     added_by = Column(String(255), nullable=True)
     date_added = Column(Date, nullable=True)
@@ -474,7 +475,7 @@ class LocationTypes(Base):
     __tablename__ = "location_type"
 
     ltype_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    ltype_name = Column(String(255), nullable=False)
+    ltype_name = Column(String(255), nullable=True)
 
 
 
@@ -507,13 +508,13 @@ class CreateClientRequest(BaseModel):
     firstname: str
     lastname: str
     email: str
-    phone_number: str
-    position: str
-    parish_id: int
-    ltype_id: int
-    location_id: int
-    division_id: int
-    branch_id: int
+    phone_number: Optional[str]
+    position: Optional[str]
+    parish_id: Optional[int]
+    ltype_id: Optional[int]
+    location_id: Optional[int]
+    division_id: Optional[int]
+    branch_id: Optional[int]
 
 class Token(BaseModel):
     access_token: str
@@ -540,6 +541,8 @@ class DeviceRequest(BaseModel):
     supplier_name: Optional[str] = None
     device_cost: Optional[int] = None
 
+    return_date: date | None = None
+
     status_id: Optional[int] = None
     parish_id: Optional[int] = None
     ltype_id: Optional[int] = None
@@ -557,7 +560,6 @@ class LaptopRequest(DeviceRequest):
     memory_capacity: str | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-    return_date: date | None = None
     mac_address: str | None = None
     manufactured_date: date | None = None
     memory_type: str | None = None
@@ -579,8 +581,6 @@ class DesktopRequest(DeviceRequest):
 
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-
-    return_date: date | None = None
 
     mac_address: str | None = None
 
@@ -749,7 +749,6 @@ class ServerRequest(DeviceRequest):
     memory_capacity: str | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-    return_date: date | None = None
     mac_address: str | None = None
     manufactured_date: date | None = None
     memory_type: str | None = None
@@ -772,7 +771,6 @@ class TabletRequest(DeviceRequest):
     memory_capacity: str | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-    return_date: date | None = None
     device_size: str | None = None
     operating_system: str | None = None
     imei_number: str | None = None
@@ -818,10 +816,8 @@ class SurgeProtectorRequest(DeviceRequest):
 
 class UPSRequest(DeviceRequest):
     number_of_outlets: int | None = None
-    return_date: date | None = None
 
 class SpeakerRequest(DeviceRequest):
-    return_date: date | None = None
     speaker_type_id: int | None = None
     number_of_speakers: int | None = None
 
@@ -830,10 +826,10 @@ class OtherEquipmentRequest(DeviceRequest):
     
 
 class PrinterRequest(DeviceRequest):
-    return_date: date | None = None
     ip_address: str | None = None
     feature_id: int | None = None
     connection_type_id: int | None = None
+    mac_address: str | None = None
 
 
 class CRAVEquipmentRequest(DeviceRequest):
@@ -846,7 +842,6 @@ class CRAVEquipmentRequest(DeviceRequest):
 class NetworkSwitchRequest(DeviceRequest):
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-    return_date: date | None = None
     mac_address: str | None = None
     number_of_ports: int | None = None
     device_size: str | None = None
@@ -859,7 +854,6 @@ class NetworkSwitchRequest(DeviceRequest):
 class MonitorRequest(DeviceRequest):
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
-    return_date: date | None = None
     manufactured_date: date | None = None
     monitor_size: str | None = None
     monitor_type_id: int | None = None
