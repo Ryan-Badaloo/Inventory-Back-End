@@ -191,6 +191,37 @@ class BagFabricTypes(Base):
     bag_fabric_type_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     bag_fabric_type_description = Column(String(255), nullable=True)
 
+class OperatingSystems(Base):
+    __tablename__ = "operating_system"
+
+    operating_system_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    operating_system_description = Column(String(255), nullable=True)
+
+class MemoryCapacities(Base):
+    __tablename__ = "memory_capacity"
+
+    memory_capacity_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    memory_capacity_description = Column(String(255), nullable=True)
+
+class HardDiskCapacities(Base):
+    __tablename__ = "hard_disk_capacity"
+
+    hard_disk_capacity_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    hard_disk_capacity_description = Column(String(255), nullable=True)
+
+class MicrosoftOfficeVersions(Base):
+    __tablename__ = "microsoft_office_version"
+
+    microsoft_office_version_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    microsoft_office_version_description = Column(String(255), nullable=True)
+
+class ProcessorTypes(Base):
+    __tablename__ = "processor_type"
+
+    processor_type_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    processor_type_description = Column(String(255), nullable=True)
+
+
 class Comments(Base):
     __tablename__ = "comments"
 
@@ -212,19 +243,19 @@ class Laptops(Base):
     __tablename__ = "laptop"
 
     laptop_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    hard_disk_capacity = Column(String(255), nullable=True)
-    memory_capacity = Column(String(255), nullable=True)
+    hard_disk_capacity_id = Column(Integer, ForeignKey("hard_disk_capacity.hard_disk_capacity_id", ondelete="SET NULL"), nullable=True)
+    memory_capacity_id = Column(Integer, ForeignKey("memory_capacity.memory_capacity_id", ondelete="SET NULL"), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
-    operating_system = Column(String(255), nullable=True)
+    operating_system_id = Column(Integer, ForeignKey("operating_system.operating_system_id", ondelete="SET NULL"), nullable=True)
     cpu_type_id = Column(Integer, ForeignKey("cpu_type.cpu_type_id", ondelete="SET NULL"), nullable=True)
     processor_speed = Column(String(255), nullable=True)
-    processor_type = Column(String(255), nullable=True)
+    processor_type_id = Column(Integer, ForeignKey("processor_type.processor_type_id", ondelete="SET NULL"), nullable=True)
     computer_name = Column(String(255), nullable=True)
-    microsoft_office_version = Column(String(255), nullable=True)
+    microsoft_office_version_id = Column(Integer, ForeignKey("microsoft_office_version.microsoft_office_version_id", ondelete="SET NULL"), nullable=True)
     antivirus = Column(String(255), nullable=True)
     pdf_reader = Column(String(255), nullable=True)
     devices_id = Column(Integer, ForeignKey("devices.devices_id", ondelete="CASCADE"), nullable=True)
@@ -233,19 +264,19 @@ class Desktops(Base):
     __tablename__ = "desktop"
 
     desktop_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    hard_disk_capacity = Column(String(255), nullable=True)
-    memory_capacity = Column(String(255), nullable=True)
+    hard_disk_capacity_id = Column(Integer, ForeignKey("hard_disk_capacity.hard_disk_capacity_id", ondelete="SET NULL"), nullable=True)
+    memory_capacity_id = Column(Integer, ForeignKey("memory_capacity.memory_capacity_id", ondelete="SET NULL"), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
-    operating_system = Column(String(255), nullable=True)
+    operating_system_id = Column(Integer, ForeignKey("operating_system.operating_system_id", ondelete="SET NULL"), nullable=True)
     cpu_type_id = Column(Integer, ForeignKey("cpu_type.cpu_type_id", ondelete="SET NULL"), nullable=True)
     processor_speed = Column(String(255), nullable=True)
-    processor_type = Column(String(255), nullable=True)
+    processor_type_id = Column(Integer, ForeignKey("processor_type.processor_type_id", ondelete="SET NULL"), nullable=True)
     computer_name = Column(String(255), nullable=True)
-    microsoft_office_version = Column(String(255), nullable=True)
+    microsoft_office_version_id = Column(Integer, ForeignKey("microsoft_office_version.microsoft_office_version_id", ondelete="SET NULL"), nullable=True)
     antivirus = Column(String(255), nullable=True)
     form_factor_id = Column(Integer, ForeignKey("form_factor.form_factor_id", ondelete="SET NULL"), nullable=True)
     pdf_reader = Column(String(255), nullable=True)
@@ -255,19 +286,19 @@ class Servers(Base):
     __tablename__ = "server"
 
     server_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    hard_disk_capacity = Column(String(255), nullable=True)
-    memory_capacity = Column(String(255), nullable=True)
+    hard_disk_capacity_id = Column(Integer, ForeignKey("hard_disk_capacity.hard_disk_capacity_id", ondelete="SET NULL"), nullable=True)
+    memory_capacity_id = Column(Integer, ForeignKey("memory_capacity.memory_capacity_id", ondelete="SET NULL"), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     mac_address = Column(String(255), nullable=True)
     manufactured_date = Column(Date, nullable=True)
     memory_type = Column(String(255), nullable=True)
-    operating_system = Column(String(255), nullable=True)
+    operating_system_id = Column(Integer, ForeignKey("operating_system.operating_system_id", ondelete="SET NULL"), nullable=True)
     cpu_type_id = Column(Integer, ForeignKey("cpu_type.cpu_type_id", ondelete="SET NULL"), nullable=True)
     processor_speed = Column(String(255), nullable=True)
-    processor_type = Column(String(255), nullable=True)
+    processor_type_id = Column(Integer, ForeignKey("processor_type.processor_type_id", ondelete="SET NULL"), nullable=True)
     computer_name = Column(String(255), nullable=True)
-    microsoft_office_version = Column(String(255), nullable=True)
+    microsoft_office_version_id = Column(Integer, ForeignKey("microsoft_office_version.microsoft_office_version_id", ondelete="SET NULL"), nullable=True)
     antivirus = Column(String(255), nullable=True)
     form_factor_id = Column(Integer, ForeignKey("form_factor.form_factor_id", ondelete="SET NULL"), nullable=True)
     raid_type_id = Column(Integer, ForeignKey("raid_type.raid_type_id", ondelete="SET NULL"), nullable=True)
@@ -281,12 +312,12 @@ class Tablets(Base):
     __tablename__ = "tablet"
 
     tablet_id = Column(Integer, primary_key=True, index=True, autoincrement=True)
-    hard_disk_capacity = Column(String(255), nullable=True)
-    memory_capacity = Column(String(255), nullable=True)
+    hard_disk_capacity_id = Column(Integer, ForeignKey("hard_disk_capacity.hard_disk_capacity_id", ondelete="SET NULL"), nullable=True)
+    memory_capacity_id = Column(Integer, ForeignKey("memory_capacity.memory_capacity_id", ondelete="SET NULL"), nullable=True)
     warranty_start_date = Column(Date, nullable=True)
     warranty_end_date = Column(Date, nullable=True)
     device_size = Column(String(255), nullable=True)
-    operating_system = Column(String(255), nullable=True)
+    operating_system_id = Column(Integer, ForeignKey("operating_system.operating_system_id", ondelete="SET NULL"), nullable=True)
     imei_number = Column(String(255), nullable=True)
     version = Column(String(255), nullable=True)
     
@@ -556,19 +587,19 @@ class DeviceRequest(BaseModel):
 
 
 class LaptopRequest(DeviceRequest):
-    hard_disk_capacity: str | None = None
-    memory_capacity: str | None = None
+    hard_disk_capacity_id: int | None = None
+    memory_capacity_id: int | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
     mac_address: str | None = None
     manufactured_date: date | None = None
     memory_type: str | None = None
-    operating_system: str | None = None
+    operating_system_id: int | None = None
     cpu_type_id: int | None = None
     processor_speed: str | None = None
-    processor_type: str | None = None
+    processor_type_id: int | None = None
     computer_name: str | None = None
-    microsoft_office_version: str | None = None
+    microsoft_office_version_id: int | None = None
     antivirus: str | None = None
     pdf_reader: str | None = None
     
@@ -576,8 +607,8 @@ class LaptopRequest(DeviceRequest):
 
 class DesktopRequest(DeviceRequest):
 
-    hard_disk_capacity: str | None = None
-    memory_capacity: str | None = None
+    hard_disk_capacity_id: int | None = None
+    memory_capacity_id: int | None = None
 
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
@@ -587,16 +618,16 @@ class DesktopRequest(DeviceRequest):
     manufactured_date: date | None = None
 
     memory_type: str | None = None
-    operating_system: str | None = None
+    operating_system_id: int | None = None
 
     cpu_type_id: int | None = None
 
     processor_speed: str | None = None
-    processor_type: str |None = None
+    processor_type_id: int | None = None
 
     computer_name: str | None = None
 
-    microsoft_office_version: str | None = None
+    microsoft_office_version_id: int | None = None
 
     antivirus: str | None = None
 
@@ -604,160 +635,22 @@ class DesktopRequest(DeviceRequest):
 
     pdf_reader: str | None = None
 
-    @classmethod
-    def as_form(
-
-        cls,
-
-        # =========================
-        # DeviceRequest fields
-        # =========================
-
-        category: str | None = Form(None),
-        brand: str | None = Form(None),
-        model: str | None = Form(None),
-
-        serial_number: str | None = Form(None),
-        inventory_number: str | None = Form(None),
-
-        delivery_date: date | None = Form(None),
-        deployment_date: date | None = Form(None),
-        bos_date: date | None = Form(None),
-
-        supplier_name: str | None = Form(None),
-
-        device_cost: int | None = Form(None),
-
-        status_id: int | None = Form(None),
-
-        division_id: int | None = Form(None),
-
-        location_id: int | None = Form(None),
-
-        comment: str | None = Form(None),
-
-        # =========================
-        # DesktopRequest fields
-        # =========================
-
-        hard_disk_capacity: str | None = Form(None),
-
-        memory_capacity: str | None = Form(None),
-
-        warranty_start_date: date | None = Form(None),
-
-        warranty_end_date: date | None = Form(None),
-
-        return_date: date | None = Form(None),
-
-        mac_address: str | None = Form(None),
-
-        manufactured_date: date | None = Form(None),
-
-        memory_type: str | None = Form(None),
-
-        operating_system: str | None = Form(None),
-
-        cpu_type_id: int | None = Form(None),
-
-        processor_speed: str | None = Form(None),
-
-        processor_type: str | None = Form(None),
-
-        computer_name: str | None = Form(None),
-
-        microsoft_office_version: str | None = Form(None),
-
-        antivirus: str | None = Form(None),
-
-        form_factor_id: int | None = Form(None),
-
-        pdf_reader: str | None = Form(None),
-
-    ):
-
-        return cls(
-
-            # =========================
-            # DeviceRequest fields
-            # =========================
-
-            category=category,
-            brand=brand,
-            model=model,
-
-            serial_number=serial_number,
-            inventory_number=inventory_number,
-
-            delivery_date=delivery_date,
-            deployment_date=deployment_date,
-            bos_date=bos_date,
-
-            supplier_name=supplier_name,
-
-            device_cost=device_cost,
-
-            status_id=status_id,
-
-            division_id=division_id,
-
-            location_id=location_id,
-
-            comment=comment,
-
-            # =========================
-            # DesktopRequest fields
-            # =========================
-
-            hard_disk_capacity=hard_disk_capacity,
-
-            memory_capacity=memory_capacity,
-
-            warranty_start_date=warranty_start_date,
-
-            warranty_end_date=warranty_end_date,
-
-            return_date=return_date,
-
-            mac_address=mac_address,
-
-            manufactured_date=manufactured_date,
-
-            memory_type=memory_type,
-
-            operating_system=operating_system,
-
-            cpu_type_id=cpu_type_id,
-
-            processor_speed=processor_speed,
-
-            processor_type=processor_type,
-
-            computer_name=computer_name,
-
-            microsoft_office_version=microsoft_office_version,
-
-            antivirus=antivirus,
-
-            form_factor_id=form_factor_id,
-
-            pdf_reader=pdf_reader,
-        )
+    
 
 class ServerRequest(DeviceRequest):
-    hard_disk_capacity: str | None = None
-    memory_capacity: str | None = None
+    hard_disk_capacity_id: int | None = None
+    memory_capacity_id: int | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
     mac_address: str | None = None
     manufactured_date: date | None = None
     memory_type: str | None = None
-    operating_system: str | None = None
+    operating_system_id: int | None = None
     cpu_type_id: int | None = None
     processor_speed: str | None = None
-    processor_type: str | None = None
+    processor_type_id: int | None = None
     computer_name: str | None = None
-    microsoft_office_version: str | None = None
+    microsoft_office_version_id: int | None = None
     antivirus: str | None = None
     form_factor_id: int | None = None
     raid_type_id: int | None = None
@@ -767,12 +660,12 @@ class ServerRequest(DeviceRequest):
 
 
 class TabletRequest(DeviceRequest):
-    hard_disk_capacity: str | None = None
-    memory_capacity: str | None = None
+    hard_disk_capacity_id: int | None = None
+    memory_capacity_id: int | None = None
     warranty_start_date: date | None = None
     warranty_end_date: date | None = None
     device_size: str | None = None
-    operating_system: str | None = None
+    operating_system_id: int | None = None
     imei_number: str | None = None
     version: str | None = None
 
@@ -898,6 +791,21 @@ class BagFabricTypeCreate(BaseModel):
 class MonitorFunctionCreate(BaseModel):
     monitor_function: str
 
+class OperatingSystemCreate(BaseModel):
+    operating_system: str
+
+class MemoryCapacityCreate(BaseModel):
+    memory_capacity: str
+
+class HardDiskCapacityCreate(BaseModel):
+    hard_disk_capacity: str
+
+class MicrosoftOfficeVersionCreate(BaseModel):
+    microsoft_office_version: str
+
+class ProcessorTypeCreate(BaseModel):
+    processor_type: str
+
 class CommentCreate(BaseModel):
     id: int
     comment: str
@@ -938,20 +846,20 @@ class UpdatePackage(BaseModel):
     supplier_name: Optional[str]
     device_cost: Optional[str]
     status_id: Optional[int]
-    hard_disk_capacity: Optional[str]
-    memory_capacity: Optional[str]
+    hard_disk_capacity_id: Optional[int]
     warranty_start_date: Optional[date]
     warranty_end_date: Optional[date]
     return_date: Optional[date]
     mac_address: Optional[str]
     manufactured_date: Optional[date]
     memory_type: Optional[str]
-    operating_system: Optional[str]
+    memory_capacity_id: Optional[int]
+    operating_system_id: Optional[int]
     cpu_type_id: Optional[int]
     processor_speed: Optional[str]
-    processor_type: Optional[str]
+    processor_type_id: Optional[int]
     computer_name: Optional[str]
-    ms_office_version: Optional[str]
+    microsoft_office_version_id: Optional[int]
     antivirus: Optional[str]
     form_factor_id: Optional[int]
     raid_type_id: Optional[int]
